@@ -246,6 +246,27 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleDeleteTournament = async (tournamentId: number) => {
+    if (!window.confirm("Are you sure you want to delete this tournament? This action is permanent and cannot be undone.")) {
+        return;
+    }
+
+    try {
+        const { error } = await supabase
+            .from('tournaments')
+            .delete()
+            .eq('id', tournamentId);
+
+        if (error) throw error;
+        
+        setTournaments(ts => ts.filter(t => t.id !== tournamentId));
+        alert("Tournament deleted successfully.");
+    } catch (error: any) {
+        console.error("Error deleting tournament:", error);
+        alert(`Failed to delete tournament: ${error.message}`);
+    }
+  };
+
   const pendingRegistrations = allRegistrations.filter(r => r.status === 'Pending');
 
   return (
@@ -281,10 +302,16 @@ const AdminDashboard: React.FC = () => {
                       <p className="text-white">{t.name}</p>
                       <p className="text-xs text-gray-400">Room ID: {t.room_id || 'Not set'} | Pass: {t.room_password || 'Not set'}</p>
                     </div>
-                    <button onClick={() => { setEditingTournament(t); setShowAddModal(true); }} className="text-sm text-yellow-400 hover:underline flex items-center space-x-1">
-                      <PencilIcon className="w-4 h-4" />
-                      <span>Edit</span>
-                    </button>
+                    <div className="flex items-center space-x-4">
+                        <button onClick={() => { setEditingTournament(t); setShowAddModal(true); }} className="text-sm text-yellow-400 hover:underline flex items-center space-x-1">
+                          <PencilIcon className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                        <button onClick={() => handleDeleteTournament(t.id)} className="text-sm text-red-500 hover:text-red-400 flex items-center space-x-1">
+                          <XMarkIcon className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                    </div>
                 </div>
             ))}
         </div>
