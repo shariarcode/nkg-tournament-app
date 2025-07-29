@@ -27,7 +27,7 @@ const Leaderboard: React.FC = () => {
                                 <span className={`flex-shrink-0 w-10 h-10 flex items-center justify-center font-bold text-lg rounded-full ${getRankColor(player.rank || 0)}`}>
                                     {player.rank}
                                 </span>
-                                <img src={player.profile_pic_url || ''} alt={player.player_name} className="w-12 h-12 rounded-full object-cover border-2 border-gray-600" />
+                                <img src={player.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${player.player_name}`} alt={player.player_name} className="w-12 h-12 rounded-full object-cover border-2 border-gray-600" />
                                 <div className="flex-1">
                                     <p className="text-lg font-semibold text-white">{player.player_name}</p>
                                 </div>

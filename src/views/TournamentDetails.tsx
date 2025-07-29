@@ -10,6 +10,13 @@ const TournamentDetails: React.FC<TournamentDetailsProps> = ({ tournament }) => 
     const { navigate } = useContext(AppContext) as AppContextType;
     const showRoomDetails = tournament.status === 'Ongoing';
 
+    const handleCopy = (text: string | null) => {
+        if (text) {
+            navigator.clipboard.writeText(text);
+            alert("Copied to clipboard!");
+        }
+    }
+
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
             <div className="text-center">
@@ -24,11 +31,11 @@ const TournamentDetails: React.FC<TournamentDetailsProps> = ({ tournament }) => 
                     <div className="space-y-6 text-center">
                         <div>
                             <p className="text-lg text-gray-400">Room ID</p>
-                            <p className="text-3xl font-mono bg-gray-900 inline-block px-8 py-3 rounded-lg text-white tracking-widest cursor-pointer" title="Click to copy">{tournament.room_id || 'Not set'}</p>
+                            <p onClick={() => handleCopy(tournament.room_id)} className="text-3xl font-mono bg-gray-900 inline-block px-8 py-3 rounded-lg text-white tracking-widest cursor-pointer" title="Click to copy">{tournament.room_id || 'Not set'}</p>
                         </div>
                         <div>
                             <p className="text-lg text-gray-400">Room Password</p>
-                            <p className="text-3xl font-mono bg-gray-900 inline-block px-8 py-3 rounded-lg text-white tracking-widest cursor-pointer" title="Click to copy">{tournament.room_password || 'Not set'}</p>
+                            <p onClick={() => handleCopy(tournament.room_password)} className="text-3xl font-mono bg-gray-900 inline-block px-8 py-3 rounded-lg text-white tracking-widest cursor-pointer" title="Click to copy">{tournament.room_password || 'Not set'}</p>
                         </div>
                         <p className="text-sm text-yellow-400 pt-4">Please do not share these details with anyone not participating in the tournament.</p>
                     </div>

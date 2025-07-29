@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { ChatMessage } from '../types';
 import { AI_SYSTEM_INSTRUCTION } from '../constants';
 
-const apiKey = (import.meta as any).env.VITE_API_KEY;
+const apiKey = import.meta.env.VITE_API_KEY;
 
 if (!apiKey) {
   console.warn("VITE_API_KEY environment variable not set. Gemini API calls will fail.");

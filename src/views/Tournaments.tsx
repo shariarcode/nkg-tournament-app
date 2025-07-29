@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Tournament } from '../types';
+import { RegistrationStatus, Tournament } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import TournamentCard from '../components/TournamentCard';
 import JoinTournamentModal from '../components/JoinTournamentModal';
@@ -41,14 +41,14 @@ const Tournaments: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tournaments.map(t => {
             const registration = registrations.find(r => r.player_id === player.id && r.tournament_id === t.id);
-            const registrationStatus = registration ? registration.status : null;
+            const registrationStatus = registration ? registration.status as RegistrationStatus : null;
             return (
               <TournamentCard 
                 key={t.id} 
                 tournament={t} 
                 onJoin={handleJoinClick}
                 onViewDetails={handleViewDetailsClick}
-                registrationStatus={registrationStatus as any}
+                registrationStatus={registrationStatus}
               />
             );
           })}

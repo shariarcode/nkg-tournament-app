@@ -2,6 +2,9 @@ import React, { useState, useContext, useRef } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { PencilIcon } from '../components/Icons';
 import { supabase } from '../services/supabase';
+import type { Database } from '../services/database.types';
+
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 const Profile: React.FC = () => {
   const { player, setPlayer, registrations } = useContext(AppContext) as AppContextType;
@@ -16,9 +19,11 @@ const Profile: React.FC = () => {
     e.preventDefault();
     if (player.isAnonymous) return;
 
+    const updates: ProfileUpdate = { name, free_fire_id: freeFireId, phone };
+
     const { error } = await supabase
       .from('profiles')
-      .update({ name, free_fire_id: freeFireId, phone })
+      .update(updates)
       .eq('id', player.id);
 
     if (error) {
@@ -35,7 +40,7 @@ const Profile: React.FC = () => {
     
     const file = e.target.files[0];
     const fileExt = file.name.split('.').pop();
-    const filePath = `avatars/${player.id}-${Date.now()}.${fileExt}`;
+    const filePath = `${player.id}/${Date.now()}.${fileExt}`;
 
     setIsUploading(true);
     try {
@@ -51,11 +56,12 @@ const Profile: React.FC = () => {
 
         if (!urlData) throw new Error("Could not get public URL for avatar");
         
-        const newPicUrl = urlData.publicUrl;
+        const newPicUrl = `${urlData.publicUrl}?t=${new Date().getTime()}`;
 
+        const picUpdate: ProfileUpdate = { profile_pic_url: newPicUrl };
         const { error: updateError } = await supabase
             .from('profiles')
-            .update({ profile_pic_url: newPicUrl })
+            .update(picUpdate)
             .eq('id', player.id);
 
         if (updateError) throw updateError;
@@ -70,15 +76,13 @@ const Profile: React.FC = () => {
     }
   };
 
-  const playerRegistrations = registrations.filter(r => r.player_id === player.id);
-
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-8">
         <div className="flex flex-col md:flex-row items-center md:space-x-8">
           <div className="relative mb-6 md:mb-0">
             <img src={player.profilePicUrl} alt="Profile" className="w-32 h-32 rounded-full ring-4 ring-red-500 object-cover" />
-             {isUploading && <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">...</div>}
+             {isUploading && <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>}
             {!player.isAnonymous && (
               <button 
                 onClick={() => fileInputRef.current?.click()}
@@ -119,7 +123,7 @@ const Profile: React.FC = () => {
 
       <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-4 text-white">My Tournament Registrations</h2>
-        {playerRegistrations.length > 0 ? (
+        {registrations.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead className="border-b border-gray-600 text-sm text-gray-400">
@@ -130,7 +134,7 @@ const Profile: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {playerRegistrations.map(reg => (
+                {registrations.map(reg => (
                   <tr key={reg.id} className="border-b border-gray-700 last:border-0">
                     <td className="p-3">{reg.tournamentName}</td>
                     <td className="p-3">{reg.bkash_number}</td>
@@ -138,7 +142,7 @@ const Profile: React.FC = () => {
                       <span className={`px-3 py-1 text-xs font-bold rounded-full ${
                         reg.status === 'Pending' ? 'bg-yellow-500 text-black' :
                         reg.status === 'Approved' ? 'bg-green-500 text-white' :
-                        'bg-red-500 text-white'
+                        'bg-red-800 text-white'
                       }`}>
                         {reg.status}
                       </span>
@@ -149,7 +153,7 @@ const Profile: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-gray-400 text-center py-4">You haven't joined any tournaments yet. Sign in and join one!</p>
+          <p className="text-gray-400 text-center py-4">You haven't joined any tournaments yet. Go to the Tournaments page to join one!</p>
         )}
       </div>
     </div>

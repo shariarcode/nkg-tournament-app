@@ -1,16 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { ANONYMOUS_PLAYER } from '../constants';
-import { AppContext, AppContextType } from '../contexts/AppContext';
 import { TrophyIcon } from '../components/Icons';
-
-type AuthMode = 'signIn' | 'signUp' | 'recover';
-type RecoveryStep = 'enterEmail' | 'setNewPassword';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const Auth: React.FC = () => {
-  const { setPlayer } = useContext(AppContext) as AppContextType;
-  const [authMode, setAuthMode] = useState<AuthMode>('signIn');
-  const [recoveryStep, setRecoveryStep] = useState<RecoveryStep>('enterEmail');
+  const [authMode, setAuthMode] = useState<'signIn' | 'signUp' | 'recover' | 'updatePassword'>('signIn');
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -18,6 +12,21 @@ const Auth: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    // Listen for password recovery or magic link sign in
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: AuthChangeEvent, session: Session | null) => {
+        setSession(session);
+        if (event === 'PASSWORD_RECOVERY') {
+          setAuthMode('updatePassword');
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, []);
+
 
   const resetAllFields = () => {
     setName('');
@@ -27,9 +36,8 @@ const Auth: React.FC = () => {
     setMessage(null);
   };
 
-  const handleSwitchMode = (mode: AuthMode) => {
+  const handleSwitchMode = (mode: 'signIn' | 'signUp' | 'recover') => {
     setAuthMode(mode);
-    setRecoveryStep('enterEmail');
     resetAllFields();
   };
 
@@ -43,6 +51,7 @@ const Auth: React.FC = () => {
       options: {
         data: {
           name: name,
+          profile_pic_url: `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${email}`
         }
       }
     });
@@ -57,6 +66,7 @@ const Auth: React.FC = () => {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
+    // on success, the main onAuthStateChange listener in App.tsx will handle the navigation
     setLoading(false);
   }
 
@@ -65,20 +75,35 @@ const Auth: React.FC = () => {
     setLoading(true);
     setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin, // Redirect back to your app
+        redirectTo: window.location.href, // This will redirect user back to the app after clicking the link
     });
     if (error) setError(error.message);
     else setMessage("Password recovery link sent! Please check your email.");
     setLoading(false);
   }
-
-  const handleAnonymousSignIn = () => {
-    setPlayer(ANONYMOUS_PLAYER);
+  
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoading(true);
+      setError(null);
+      if(password.length < 6) {
+          setError("Password must be at least 6 characters long.");
+          setLoading(false);
+          return;
+      }
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) setError(error.message);
+      else {
+          setMessage("Password updated successfully! You can now sign in.");
+          setAuthMode('signIn');
+      }
+      setLoading(false);
   };
 
   const getPageTitle = () => {
       if (authMode === 'recover') return 'Recover Your Account';
       if (authMode === 'signUp') return "Create your account to start competing";
+      if (authMode === 'updatePassword') return "Create a New Password";
       return "Sign in to join the battle";
   }
 
@@ -94,10 +119,17 @@ const Auth: React.FC = () => {
         </div>
         
         <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl p-8">
-            {error && <p className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md mb-4 text-center">{error}</p>}
-            {message && <p className="bg-green-900/50 border border-green-700 text-green-300 p-3 rounded-md mb-4 text-center">{message}</p>}
+            {error && <p className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md mb-4 text-center text-sm">{error}</p>}
+            {message && <p className="bg-green-900/50 border border-green-700 text-green-300 p-3 rounded-md mb-4 text-center text-sm">{message}</p>}
             
-            {authMode === 'recover' ? (
+            {authMode === 'updatePassword' ? (
+                 <form onSubmit={handleUpdatePassword} className="space-y-6">
+                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your new password" />
+                    <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
+                        {loading ? 'Saving...' : 'Save New Password'}
+                    </button>
+                 </form>
+            ) : authMode === 'recover' ? (
                  <form onSubmit={handlePasswordRecovery} className="space-y-6">
                     <input id="email-recover" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your email address" />
                     <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
@@ -110,7 +142,7 @@ const Auth: React.FC = () => {
                         <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Your Name" />
                     )}
                     <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Email address" />
-                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password" />
+                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password (at least 6 characters)" />
                     
                     {authMode === 'signIn' && (
                        <div className="text-right -mt-2">
@@ -126,18 +158,14 @@ const Auth: React.FC = () => {
                 </form>
             )}
             
-            <p className="mt-6 text-center text-sm text-gray-400">
-                {authMode === 'recover' ? 'Remembered your password?' : authMode === 'signUp' ? 'Already have an account?' : "Don't have an account?"}
-                <button onClick={() => handleSwitchMode(authMode === 'signIn' || authMode === 'recover' ? 'signUp' : 'signIn')} className="font-medium text-red-500 hover:text-red-400 ml-1">
-                    {authMode === 'signIn' || authMode === 'recover' ? 'Sign Up' : 'Sign In'}
-                </button>
-            </p>
-            <p className="mt-4 text-center text-sm text-gray-500">
-                or{' '}
-                <button onClick={handleAnonymousSignIn} className="font-medium text-red-500 hover:text-red-400 underline">
-                    Continue as a Guest
-                </button>
-            </p>
+             {authMode !== 'updatePassword' && (
+                <p className="mt-6 text-center text-sm text-gray-400">
+                    {authMode === 'recover' ? 'Remembered your password?' : authMode === 'signUp' ? 'Already have an account?' : "Don't have an account?"}
+                    <button onClick={() => handleSwitchMode(authMode === 'signIn' || authMode === 'recover' ? 'signUp' : 'signIn')} className="font-medium text-red-500 hover:text-red-400 ml-1">
+                        {authMode === 'signIn' || authMode === 'recover' ? 'Sign Up' : 'Sign In'}
+                    </button>
+                </p>
+            )}
         </div>
       </div>
     </div>

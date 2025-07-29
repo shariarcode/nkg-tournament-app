@@ -19,13 +19,15 @@ export type Tournament = Database['public']['Tables']['tournaments']['Row'];
 
 export type RegistrationStatus = 'Pending' | 'Approved' | 'Rejected';
 
-// Registration type based on Supabase table
-// We add player/tournament names for easier display
-export type Registration = Database['public']['Tables']['registrations']['Row'] & {
+// Base registration type from the database schema
+export type DbRegistration = Database['public']['Tables']['registrations']['Row'];
+
+// This is the type we'll use in the app state, which includes flattened data from joins.
+export interface Registration extends DbRegistration {
     playerName?: string;
-    playerFreeFireId?: string; // This can be joined from profiles table
+    playerFreeFireId?: string;
     tournamentName?: string;
-};
+}
 
 
 // Leaderboard entry type based on Supabase table

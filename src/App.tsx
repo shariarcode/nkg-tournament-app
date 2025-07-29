@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
-import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile } from './types';
+import { Player, Tournament, Registration, LeaderboardEntry } from './types';
 import { MOCK_TOURNAMENTS, MOCK_LEADERBOARD, ANONYMOUS_PLAYER } from './constants';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -63,6 +64,7 @@ export default function App() {
   useEffect(() => {
     const fetchUserAndRegistrations = async () => {
       if (session?.user) {
+        setLoading(true);
         // Fetch profile
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -72,9 +74,9 @@ export default function App() {
 
         if (error) {
           console.error('Error fetching user profile:', error);
-          handleSignOut();
+          await handleSignOut();
         } else if (profile) {
-          setPlayer({
+          const fetchedPlayer: Player = {
             id: profile.id,
             name: profile.name || 'New Player',
             email: session.user.email || '',
@@ -83,7 +85,8 @@ export default function App() {
             profilePicUrl: profile.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${profile.id}`,
             isAnonymous: false,
             isAdmin: profile.is_admin || false,
-          });
+          };
+          setPlayer(fetchedPlayer);
           
           // Fetch user-specific registrations
           const { data: regData, error: regError } = await supabase
@@ -91,41 +94,27 @@ export default function App() {
             .select('*, tournaments(name)')
             .eq('player_id', session.user.id);
 
-          if (regError) console.error("Error fetching registrations", regError);
-          else setRegistrations(regData?.map(r => ({...r, tournamentName: (r.tournaments as any)?.name || 'N/A'} as Registration)) || []);
+          if (regError) {
+            console.error("Error fetching registrations", regError);
+          } else if (regData) {
+            const formattedRegs: Registration[] = regData.map(reg => ({
+                ...reg,
+                tournamentName: reg.tournaments?.name || 'N/A'
+            }));
+            setRegistrations(formattedRegs);
+          }
         }
+        setLoading(false);
       } else {
         setPlayer(ANONYMOUS_PLAYER);
         setRegistrations([]);
+        setLoading(false);
       }
     };
 
     fetchUserAndRegistrations();
   }, [session]);
   
-  // Realtime listener for registrations (for admins)
-  useEffect(() => {
-    if (player.isAdmin) {
-      const channel = supabase
-        .channel('public:registrations')
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: 'registrations' },
-          async (payload) => {
-             console.log('Reg change received!', payload);
-             // Simple refetch for now
-             const { data, error } = await supabase.from('registrations').select('*, profiles(name), tournaments(name)');
-             if (error) console.error(error);
-             else setRegistrations(data?.map(r => ({...r, playerName: (r.profiles as any)?.name, tournamentName: (r.tournaments as any)?.name })) || []);
-          }
-        )
-        .subscribe();
-      
-      return () => {
-        supabase.removeChannel(channel);
-      };
-    }
-  }, [player.isAdmin]);
 
   const navigate = useCallback((view: View) => {
     setCurrentView(view);
@@ -169,7 +158,7 @@ export default function App() {
   
   const renderView = () => {
     if (loading) {
-       return <div className="text-center p-10">Loading...</div>;
+       return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-500"></div></div>;
     }
     if (isAdminView && player.isAdmin) return <AdminDashboard />;
     switch (currentView) {
@@ -188,7 +177,7 @@ export default function App() {
     }
   };
   
-  if (!session && !player.isAnonymous) {
+  if (!session && !loading) {
      return <Auth />;
   }
 

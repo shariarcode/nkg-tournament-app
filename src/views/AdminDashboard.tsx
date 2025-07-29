@@ -3,6 +3,96 @@ import { AppContext, AppContextType } from '../contexts/AppContext';
 import { Registration, Tournament, LeaderboardEntry } from '../types';
 import { PencilIcon, XMarkIcon } from '../components/Icons';
 import { supabase } from '../services/supabase';
+import type { Database } from '../services/database.types';
+
+type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
+type TournamentInsert = Database['public']['Tables']['tournaments']['Insert'];
+type RegistrationUpdate = Database['public']['Tables']['registrations']['Update'];
+type LeaderboardInsert = Database['public']['Tables']['leaderboard']['Insert'];
+
+
+const TournamentModalForm: React.FC<{
+    onClose: () => void;
+    onSave: (tournament: TournamentInsert | TournamentUpdate) => Promise<void>;
+    tournament?: Tournament | null;
+}> = ({ onClose, onSave, tournament }) => {
+    const [name, setName] = useState(tournament?.name || '');
+    const [date, setDate] = useState(tournament?.date || '');
+    const [time, setTime] = useState(tournament?.time || '');
+    const [entryFee, setEntryFee] = useState(tournament?.entry_fee || 0);
+    const [prizePool, setPrizePool] = useState(tournament?.prize_pool || 0);
+    const [status, setStatus] = useState<'Upcoming' | 'Ongoing' | 'Finished'>(tournament?.status as any || 'Upcoming');
+    const [roomId, setRoomId] = useState(tournament?.room_id || '');
+    const [roomPassword, setRoomPassword] = useState(tournament?.room_password || '');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        const tournamentData = { 
+            name, 
+            date, 
+            time, 
+            entry_fee: entryFee, 
+            prize_pool: prizePool, 
+            status, 
+            room_id: roomId || null, 
+            room_password: roomPassword || null
+        };
+        
+        try {
+            await onSave(tournamentData);
+            onClose();
+        } catch (error) {
+            console.error("Failed to save tournament", error);
+            alert("Error: Could not save tournament.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const isEditing = !!tournament;
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
+            <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700 animate-fade-in-up">
+                <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                    <h2 className="text-2xl font-bold text-white">{isEditing ? 'Edit' : 'Add New'} Tournament</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-white"><XMarkIcon className="w-6 h-6"/></button>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                    <input type="text" placeholder="Tournament Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    <div className="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="Date (e.g., Aug 10, 2024)" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="text" placeholder="Time (e.g., 8:00 PM)" value={time} onChange={e => setTime(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                        <input type="number" placeholder="Entry Fee" value={entryFee} onChange={e => setEntryFee(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="number" placeholder="Prize Pool" value={prizePool} onChange={e => setPrizePool(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="Room ID (optional)" value={roomId} onChange={e => setRoomId(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="text" placeholder="Room Password (optional)" value={roomPassword} onChange={e => setRoomPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    </div>
+                     <div>
+                        <label className="text-gray-400 text-sm">Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="Upcoming">Upcoming</option>
+                            <option value="Ongoing">Ongoing</option>
+                            <option value="Finished">Finished</option>
+                        </select>
+                    </div>
+                    <div className="p-4 bg-gray-900/50 border-t border-gray-700 -m-6 mt-6 pt-6">
+                        <button type="submit" disabled={isSubmitting} className="w-full bg-green-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-500 disabled:cursor-wait">
+                            {isSubmitting ? 'Saving...' : (isEditing ? 'Save Changes' : 'Add Tournament')}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 
 const AdminDashboard: React.FC = () => {
   const { 
@@ -19,42 +109,68 @@ const AdminDashboard: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editableLeaderboard, setEditableLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRegistrations, setLoadingRegistrations] = useState(true);
+
+  const fetchAdminData = async () => {
+      setLoadingRegistrations(true);
+      try {
+          const { data, error } = await supabase.from('registrations').select('*, profiles(name, free_fire_id), tournaments(name)');
+          if (error) throw error;
+          if (data) {
+            const formattedData: Registration[] = data.map(r => {
+                return {
+                    ...r,
+                    playerName: r.profiles?.name || 'Unknown Player',
+                    playerFreeFireId: r.profiles?.free_fire_id || 'N/A',
+                    tournamentName: r.tournaments?.name || 'Unknown Tournament'
+                };
+            });
+            setAllRegistrations(formattedData);
+          }
+      } catch (error) {
+          console.error("Error fetching registrations for admin:", error);
+          alert("Could not fetch registrations.");
+      } finally {
+          setLoadingRegistrations(false);
+      }
+  };
 
   useEffect(() => {
-    const fetchAdminData = async () => {
-        setLoading(true);
-        try {
-            const { data, error } = await supabase.from('registrations').select('*, profiles(name, free_fire_id), tournaments(name)');
-            if (error) throw error;
-            const formattedData = data.map(r => ({
-                ...r,
-                playerName: (r.profiles as any)?.name || 'Unknown Player',
-                playerFreeFireId: (r.profiles as any)?.free_fire_id || 'N/A',
-                tournamentName: (r.tournaments as any)?.name || 'Unknown Tournament'
-            }));
-            setAllRegistrations(formattedData);
-        } catch (error) {
-            console.error("Error fetching registrations for admin:", error);
-            alert("Could not fetch registrations.");
-        } finally {
-            setLoading(false);
-        }
-    };
     fetchAdminData();
+    // Deep copy leaderboard to avoid direct state mutation
     setEditableLeaderboard(JSON.parse(JSON.stringify(leaderboard)));
   }, [leaderboard]);
   
+  // Realtime listener for new registrations
+  useEffect(() => {
+      const channel = supabase
+        .channel('public:registrations')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'registrations' },
+          () => {
+             fetchAdminData(); // Refetch all data on new registration
+          }
+        )
+        .subscribe();
+      
+      return () => {
+        supabase.removeChannel(channel);
+      };
+  }, []);
+
   const handleUpdateNotice = () => {
     // In a real app, this would be saved to a database table.
+    // For now, this remains a client-side only feature.
     setNotice(newNotice);
-    alert("Notice updated! (Client-side only for this demo)");
+    alert("Notice updated!");
   };
   
   const approveRegistration = async (registrationId: number) => {
+    const update: RegistrationUpdate = { status: 'Approved' };
     const { error } = await supabase
       .from('registrations')
-      .update({ status: 'Approved' })
+      .update(update)
       .eq('id', registrationId);
 
     if (error) {
@@ -65,21 +181,21 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleLeaderboardChange = (id: number, field: 'player_name' | 'winnings', value: string | number) => {
+  const handleLeaderboardChange = (id: number, field: keyof LeaderboardEntry, value: string | number) => {
     setEditableLeaderboard(current =>
       current.map(entry =>
-        entry.id === id ? { ...entry, [field]: value } : entry
+        entry.id === id ? { ...entry, [field as keyof LeaderboardEntry]: value as never } : entry
       )
     );
   };
 
   const handleAddLeaderboardEntry = () => {
     const newEntry: LeaderboardEntry = {
-      id: Date.now(), // Temporary ID
+      id: Date.now(), // Temporary client-side ID
       rank: editableLeaderboard.length + 1,
       player_name: 'New Player',
       winnings: 0,
-      profile_pic_url: `https://picsum.photos/seed/new${Date.now()}/100`
+      profile_pic_url: `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=new${Date.now()}`
     };
     setEditableLeaderboard(current => [...current, newEntry]);
   };
@@ -93,39 +209,40 @@ const AdminDashboard: React.FC = () => {
     const ranked = sorted.map((entry, index) => ({ 
         ...entry, 
         rank: index + 1,
-        // The id from DB should be kept. If it's a new entry, we'll let DB create it.
-        id: entry.id > 1000000 ? undefined : entry.id 
     }));
     
-    // Clear the table first
-    const { error: deleteError } = await supabase.from('leaderboard').delete().neq('id', -1); // delete all
-    if(deleteError) {
+    const { error: deleteError } = await supabase.from('leaderboard').delete().neq('id', -1);
+     if(deleteError) {
         alert("Error clearing leaderboard: " + deleteError.message);
         return;
     }
     
-    // Insert new data
-    const { data, error: insertError } = await supabase.from('leaderboard').insert(
-        ranked.map(({id, ...rest}) => rest)
-    ).select();
-    
+    const insertableData: LeaderboardInsert[] = ranked.map(({ id, ...rest }) => rest);
+    const { data: insertedData, error: insertError } = await supabase.from('leaderboard').insert(insertableData).select();
+
     if (insertError) {
         alert("Error saving leaderboard: " + insertError.message);
     } else {
-        setLeaderboard(data || []);
+        setLeaderboard(insertedData || []);
         alert("Leaderboard saved successfully!");
     }
   };
   
-  const handleSaveTournament = async (tournamentData: any) => {
+  const handleSaveTournament = async (tournamentData: TournamentInsert | TournamentUpdate) => {
     if (editingTournament) { // Edit
         const { data, error } = await supabase.from('tournaments').update(tournamentData).eq('id', editingTournament.id).select().single();
-        if (error) alert(error.message);
-        else setTournaments(ts => ts.map(t => t.id === data.id ? data : t));
+        if (error) {
+            alert(error.message);
+            throw error;
+        }
+        else if (data) setTournaments(ts => ts.map(t => t.id === data.id ? data : t));
     } else { // Add
-        const { data, error } = await supabase.from('tournaments').insert(tournamentData).select().single();
-        if (error) alert(error.message);
-        else setTournaments(ts => [data, ...ts]);
+        const { data, error } = await supabase.from('tournaments').insert(tournamentData as TournamentInsert).select().single();
+        if (error) {
+            alert(error.message);
+            throw error;
+        }
+        else if (data) setTournaments(ts => [data, ...ts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     }
   };
 
@@ -213,8 +330,9 @@ const AdminDashboard: React.FC = () => {
       {/* Payment Approval */}
       <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
         <h2 className="text-2xl font-bold mb-4 text-white">Pending Approvals ({pendingRegistrations.length})</h2>
-        {loading ? <p>Loading registrations...</p> : pendingRegistrations.length > 0 ? (
-          <div className="space-y-4">
+        {loadingRegistrations ? <p className="text-gray-400">Loading registrations...</p> : 
+         pendingRegistrations.length > 0 ? (
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
             {pendingRegistrations.map(reg => (
               <div key={reg.id} className="bg-gray-700 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <a href={reg.payment_screenshot_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
@@ -239,73 +357,15 @@ const AdminDashboard: React.FC = () => {
           <p className="text-gray-400">No pending approvals.</p>
         )}
       </div>
-      {showAddModal && <TournamentModalForm onClose={() => setShowAddModal(false)} onSave={handleSaveTournament} tournament={editingTournament} />}
+      {(showAddModal) && 
+        <TournamentModalForm 
+          onClose={() => { setShowAddModal(false); setEditingTournament(null); }} 
+          onSave={handleSaveTournament} 
+          tournament={editingTournament}
+        />
+      }
     </div>
   );
 };
-
-interface TournamentModalProps {
-    onClose: () => void;
-    onSave: (tournament: any) => void;
-    tournament?: Tournament | null;
-}
-
-const TournamentModalForm: React.FC<TournamentModalProps> = ({ onClose, onSave, tournament }) => {
-    const [name, setName] = useState(tournament?.name || '');
-    const [date, setDate] = useState(tournament?.date || '');
-    const [time, setTime] = useState(tournament?.time || '');
-    const [entryFee, setEntryFee] = useState(tournament?.entry_fee || 0);
-    const [prizePool, setPrizePool] = useState(tournament?.prize_pool || 0);
-    const [status, setStatus] = useState<'Upcoming' | 'Ongoing' | 'Finished'>(tournament?.status as any || 'Upcoming');
-    const [roomId, setRoomId] = useState(tournament?.room_id || '');
-    const [roomPassword, setRoomPassword] = useState(tournament?.room_password || '');
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const tournamentData = { name, date, time, entry_fee: entryFee, prize_pool: prizePool, status, room_id: roomId, room_password: roomPassword };
-        onSave(tournamentData);
-        onClose();
-    };
-
-    const isEditing = !!tournament;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-            <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700">
-                <div className="flex justify-between items-center p-4 border-b border-gray-700">
-                    <h2 className="text-2xl font-bold text-white">{isEditing ? 'Edit' : 'Add New'} Tournament</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white"><XMarkIcon className="w-6 h-6"/></button>
-                </div>
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                    <input type="text" placeholder="Tournament Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                    <div className="grid grid-cols-2 gap-4">
-                        <input type="text" placeholder="Date (e.g., Aug 10, 2024)" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="text" placeholder="Time (e.g., 8:00 PM)" value={time} onChange={e => setTime(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                    </div>
-                     <div className="grid grid-cols-2 gap-4">
-                        <input type="number" placeholder="Entry Fee" value={entryFee} onChange={e => setEntryFee(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="number" placeholder="Prize Pool" value={prizePool} onChange={e => setPrizePool(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <input type="text" placeholder="Room ID (optional)" value={roomId} onChange={e => setRoomId(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="text" placeholder="Room Password (optional)" value={roomPassword} onChange={e => setRoomPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                    </div>
-                     <div>
-                        <label className="text-gray-400 text-sm">Status</label>
-                        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500">
-                            <option value="Upcoming">Upcoming</option>
-                            <option value="Ongoing">Ongoing</option>
-                            <option value="Finished">Finished</option>
-                        </select>
-                    </div>
-                    <div className="p-4 bg-gray-900/50 border-t border-gray-700 -m-6 mt-6 pt-6">
-                        <button type="submit" className="w-full bg-green-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">{isEditing ? 'Save Changes' : 'Add Tournament'}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
 
 export default AdminDashboard;

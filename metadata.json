@@ -1,4 +1,6 @@
 {
   "name": "NKG Tournament BD",
-  "description": "A platform to join and participate in online gaming tournaments. Features AI-powered support, tournament listings, and user profiles in a sleek dark mode interface."
+  "description": "A platform to join and participate in online gaming tournaments. Features AI-powered support, tournament listings, and user profiles in a sleek dark mode interface.",
+  "requestFramePermissions": [],
+  "prompt": ""
 }

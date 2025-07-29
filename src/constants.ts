@@ -1,14 +1,5 @@
 import { Tournament, Player, LeaderboardEntry } from './types';
 
-export const INITIAL_PLAYER_STATE: Player = {
-  id: '',
-  name: '',
-  email: '',
-  freeFireId: '',
-  phone: '',
-  profilePicUrl: ''
-};
-
 export const ANONYMOUS_PLAYER: Player = {
   id: 'anonymous_user',
   name: 'Guest Player',
@@ -25,7 +16,7 @@ export const MOCK_TOURNAMENTS: Tournament[] = [
   {
     id: 1,
     created_at: new Date().toISOString(),
-    name: 'NKG Weekly Scrims S1',
+    name: 'Fallback Weekly Scrims S1',
     date: 'July 30, 2024',
     time: '8:00 PM',
     entry_fee: 100,
@@ -37,7 +28,7 @@ export const MOCK_TOURNAMENTS: Tournament[] = [
   {
     id: 2,
     created_at: new Date().toISOString(),
-    name: 'Eid Special Duo Challenge',
+    name: 'Fallback Eid Duo Challenge',
     date: 'August 5, 2024',
     time: '9:00 PM',
     entry_fee: 200,
@@ -49,8 +40,8 @@ export const MOCK_TOURNAMENTS: Tournament[] = [
 ];
 
 export const MOCK_LEADERBOARD: LeaderboardEntry[] = [
-  { id: 1, rank: 1, player_name: 'ShadowKnight', winnings: 15000, profile_pic_url: 'https://picsum.photos/seed/leader1/100' },
-  { id: 2, rank: 2, player_name: 'ViperGaming', winnings: 12500, profile_pic_url: 'https://picsum.photos/seed/leader2/100' },
+  { id: 1, rank: 1, player_name: 'Fallback ShadowKnight', winnings: 15000, profile_pic_url: 'https://picsum.photos/seed/leader1/100' },
+  { id: 2, rank: 2, player_name: 'Fallback ViperGaming', winnings: 12500, profile_pic_url: 'https://picsum.photos/seed/leader2/100' },
 ];
 
 

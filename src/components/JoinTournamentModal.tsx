@@ -1,13 +1,16 @@
 import React, { useState, useContext, useRef } from 'react';
-import { Tournament } from '../types';
+import { Tournament, Registration } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { XMarkIcon, ArrowUpTrayIcon } from './Icons';
 import { supabase } from '../services/supabase';
+import type { Database } from '../services/database.types';
 
 interface JoinTournamentModalProps {
   tournament: Tournament | null;
   onClose: () => void;
 }
+
+type RegistrationInsert = Database['public']['Tables']['registrations']['Insert'];
 
 const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, onClose }) => {
   const { player, setRegistrations } = useContext(AppContext) as AppContextType;
@@ -59,24 +62,30 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
       if (!urlData) throw new Error("Could not get public URL for screenshot");
 
       // 3. Insert registration into the database
-      const newRegistration = {
+      const newRegistration: RegistrationInsert = {
         player_id: player.id,
         tournament_id: tournament.id,
         bkash_number: bkashNumber,
         bkash_last4: bkashLast4,
         payment_screenshot_url: urlData.publicUrl,
-        status: 'Pending' as const,
+        status: 'Pending',
       };
 
       const { data: regData, error: insertError } = await supabase
         .from('registrations')
         .insert(newRegistration)
-        .select()
+        .select('*, tournaments(name)')
         .single();
       
       if (insertError) throw insertError;
       
-      setRegistrations(prev => [...prev, {...regData, tournamentName: tournament.name}]);
+      if (regData) {
+        const newRegWithTournamentName: Registration = { 
+            ...regData, 
+            tournamentName: regData.tournaments?.name || 'N/A' 
+        };
+        setRegistrations(prev => [...prev, newRegWithTournamentName]);
+      }
 
       alert('Thank you for your submission! Please wait for admin approval.');
       onClose();

@@ -1,0 +1,1 @@
+// This file is obsolete. The application's entry point is /src/index.tsx.
