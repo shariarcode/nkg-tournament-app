@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { TrophyIcon } from '../components/Icons';
+import { TrophyIcon, GoogleIcon } from '../components/Icons';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const Auth: React.FC = () => {
@@ -49,6 +49,7 @@ const Auth: React.FC = () => {
       email,
       password,
       options: {
+        emailRedirectTo: window.location.origin,
         data: {
           name: name,
           profile_pic_url: `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${email}`
@@ -69,6 +70,22 @@ const Auth: React.FC = () => {
     // on success, the main onAuthStateChange listener in App.tsx will handle the navigation
     setLoading(false);
   }
+
+  const handleSignInWithGoogle = async () => {
+    setLoading(true);
+    setError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin,
+        },
+    });
+    if (error) {
+        setError(error.message);
+        setLoading(false);
+    }
+    // On success, Supabase handles the redirect.
+  };
 
   const handlePasswordRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,25 +154,43 @@ const Auth: React.FC = () => {
                     </button>
                  </form>
             ) : (
-                <form onSubmit={authMode === 'signIn' ? handleSignIn : handleSignUp} className="space-y-6">
-                    {authMode === 'signUp' && (
-                        <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Your Name" />
-                    )}
-                    <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Email address" />
-                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password (at least 6 characters)" />
-                    
-                    {authMode === 'signIn' && (
-                       <div className="text-right -mt-2">
-                           <button type="button" onClick={() => handleSwitchMode('recover')} className="text-sm font-medium text-red-500 hover:text-red-400">
-                               Forgot password?
-                           </button>
-                       </div>
-                    )}
-                    
-                    <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
-                        {loading ? 'Processing...' : (authMode === 'signUp' ? 'Create Account' : 'Sign In')}
+                <>
+                    <form onSubmit={authMode === 'signIn' ? handleSignIn : handleSignUp} className="space-y-6">
+                        {authMode === 'signUp' && (
+                            <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Your Name" />
+                        )}
+                        <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Email address" />
+                        <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password (at least 6 characters)" />
+                        
+                        {authMode === 'signIn' && (
+                           <div className="text-right -mt-2">
+                               <button type="button" onClick={() => handleSwitchMode('recover')} className="text-sm font-medium text-red-500 hover:text-red-400">
+                                   Forgot password?
+                               </button>
+                           </div>
+                        )}
+                        
+                        <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
+                            {loading ? 'Processing...' : (authMode === 'signUp' ? 'Create Account' : 'Sign In')}
+                        </button>
+                    </form>
+
+                    <div className="relative flex py-4 items-center">
+                        <div className="flex-grow border-t border-gray-600"></div>
+                        <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Or continue with</span>
+                        <div className="flex-grow border-t border-gray-600"></div>
+                    </div>
+
+                    <button 
+                        type="button" 
+                        onClick={handleSignInWithGoogle}
+                        disabled={loading}
+                        className="w-full flex items-center justify-center bg-white text-gray-700 font-bold py-3 rounded-lg transition-colors hover:bg-gray-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                        <GoogleIcon className="w-5 h-5 mr-3" />
+                        Sign in with Google
                     </button>
-                </form>
+                </>
             )}
             
              {authMode !== 'updatePassword' && (
