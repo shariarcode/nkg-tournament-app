@@ -14,8 +14,12 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
-  // Explicitly define the redirect URL for development to avoid ambiguity.
-  const REDIRECT_URL = 'http://localhost:5173/';
+  // Use the current origin for the redirect URL.
+  // This makes the app more robust as it will work for any development port
+  // and also for the production deployment.
+  // IMPORTANT: Ensure this URL is added to your Supabase Auth URL configuration.
+  // For local development, you might add: http://localhost:5173/**
+  const REDIRECT_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
     // Listen for password recovery or magic link sign in
