@@ -95,14 +95,14 @@ export interface Database {
           {
             foreignKeyName: "registrations_player_id_fkey"
             columns: ["player_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "registrations_tournament_id_fkey"
             columns: ["tournament_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "tournaments"
             referencedColumns: ["id"]
           },

@@ -14,6 +14,9 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
+  // Explicitly define the redirect URL for development to avoid ambiguity.
+  const REDIRECT_URL = 'http://localhost:5173/';
+
   useEffect(() => {
     // Listen for password recovery or magic link sign in
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -49,7 +52,7 @@ const Auth: React.FC = () => {
       email,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: REDIRECT_URL,
         data: {
           name: name,
           profile_pic_url: `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${email}`
@@ -77,7 +80,7 @@ const Auth: React.FC = () => {
     const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-            redirectTo: window.location.origin,
+            redirectTo: REDIRECT_URL,
         },
     });
     if (error) {
@@ -92,7 +95,7 @@ const Auth: React.FC = () => {
     setLoading(true);
     setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href, // This will redirect user back to the app after clicking the link
+        redirectTo: REDIRECT_URL, // This will redirect user back to the app after clicking the link
     });
     if (error) setError(error.message);
     else setMessage("Password recovery link sent! Please check your email.");
