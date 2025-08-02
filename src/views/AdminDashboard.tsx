@@ -1,3 +1,4 @@
+
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { Registration, Tournament, LeaderboardEntry } from '../types';
@@ -114,7 +115,7 @@ const AdminDashboard: React.FC = () => {
           const { data, error } = await supabase.from('registrations').select('*, profiles(name, free_fire_id), tournaments(name)');
           if (error) throw error;
           if (data) {
-            const formattedData: Registration[] = data.map(r => {
+            const formattedData: Registration[] = (data as any[]).map(r => {
                 return {
                     ...r,
                     playerName: r.profiles?.name || 'Unknown Player',
@@ -152,7 +153,7 @@ const AdminDashboard: React.FC = () => {
   
   const approveRegistration = async (registrationId: number) => {
     const update: RegistrationUpdate = { status: 'Approved' };
-    const { error } = await supabase.from('registrations').update(update).eq('id', registrationId);
+    const { error } = await (supabase.from('registrations') as any).update(update).eq('id', registrationId);
     if (error) alert(`Error approving registration: ${error.message}`);
     else {
       setAllRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status: 'Approved' } : r));
@@ -187,24 +188,24 @@ const AdminDashboard: React.FC = () => {
     if(deleteError) { alert("Error clearing leaderboard: " + deleteError.message); return; }
     
     const insertableData: LeaderboardInsert[] = ranked.map(({ id, ...rest }) => rest);
-    const { data: insertedData, error: insertError } = await supabase.from('leaderboard').insert(insertableData).select();
+    const { data: insertedData, error: insertError } = await (supabase.from('leaderboard') as any).insert(insertableData).select();
 
     if (insertError) alert("Error saving leaderboard: " + insertError.message);
     else {
-      setLeaderboard(insertedData || []);
+      setLeaderboard(insertedData as LeaderboardEntry[] || []);
       alert("Leaderboard saved successfully!");
     }
   };
   
   const handleSaveTournament = async (tournamentData: TournamentInsert | TournamentUpdate) => {
     if (editingTournament) { // Edit
-        const { data, error } = await supabase.from('tournaments').update(tournamentData).eq('id', editingTournament.id).select().single();
+        const { data, error } = await (supabase.from('tournaments') as any).update(tournamentData).eq('id', editingTournament.id).select().single();
         if (error) { alert(error.message); throw error; }
-        else if (data) setTournaments(ts => ts.map(t => t.id === data.id ? data : t));
+        else if (data) setTournaments(ts => ts.map(t => t.id === (data as Tournament).id ? (data as Tournament) : t));
     } else { // Add
-        const { data, error } = await supabase.from('tournaments').insert(tournamentData as TournamentInsert).select().single();
+        const { data, error } = await (supabase.from('tournaments') as any).insert(tournamentData as TournamentInsert).select().single();
         if (error) { alert(error.message); throw error; }
-        else if (data) setTournaments(ts => [data, ...ts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        else if (data) setTournaments(ts => [(data as Tournament), ...ts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     }
   };
 

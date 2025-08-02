@@ -1,7 +1,7 @@
 
 import React, { useContext } from 'react';
 import { View, AppContext, AppContextType } from '../contexts/AppContext';
-import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, UserIcon } from './Icons';
+import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, NKGLogoIcon } from './Icons';
 
 interface HeaderProps {
   currentView: View;
@@ -52,9 +52,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
       {/* Main Header */}
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => onNavigate('home')}>
-             <img src="/favicon.svg" alt="NKG Logo" className="h-10 w-10"/>
-             <span className="text-3xl font-display text-white">NKG</span>
+          <div className="flex items-center cursor-pointer" onClick={() => onNavigate('home')}>
+             <NKGLogoIcon className="h-9 w-auto" />
           </div>
           
           <nav className="hidden lg:flex items-center space-x-2">

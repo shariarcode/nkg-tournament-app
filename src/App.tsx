@@ -1,6 +1,7 @@
+
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
-import { Player, Tournament, Registration, LeaderboardEntry } from './types';
+import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile } from './types';
 import { MOCK_TOURNAMENTS, MOCK_LEADERBOARD, ANONYMOUS_PLAYER } from './constants';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -33,11 +34,11 @@ export default function App() {
         setLoading(true);
         const { data: tourneyData, error: tourneyError } = await supabase.from('tournaments').select('*').order('date', { ascending: false });
         if (tourneyError) throw tourneyError;
-        setTournaments(tourneyData || []);
+        setTournaments((tourneyData as Tournament[]) || []);
 
         const { data: leaderboardData, error: leaderboardError } = await supabase.from('leaderboard').select('*').order('rank', { ascending: true });
         if (leaderboardError) throw leaderboardError;
-        setLeaderboard(leaderboardData || []);
+        setLeaderboard((leaderboardData as LeaderboardEntry[]) || []);
       } catch (error) {
         console.error("Error fetching initial data:", error);
         // Set mock data as fallback
@@ -73,15 +74,16 @@ export default function App() {
           console.error('Error fetching user profile:', error);
           await handleSignOut();
         } else if (profile) {
+          const typedProfile = profile as SupabaseProfile;
           const fetchedPlayer: Player = {
-            id: profile.id,
-            name: profile.name || 'New Player',
+            id: typedProfile.id,
+            name: typedProfile.name || 'New Player',
             email: session.user.email || '',
-            freeFireId: profile.free_fire_id || 'N/A',
-            phone: profile.phone || 'N/A',
-            profilePicUrl: profile.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${profile.id}`,
+            freeFireId: typedProfile.free_fire_id || 'N/A',
+            phone: typedProfile.phone || 'N/A',
+            profilePicUrl: typedProfile.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${typedProfile.id}`,
             isAnonymous: false,
-            isAdmin: profile.is_admin || false,
+            isAdmin: typedProfile.is_admin || false,
           };
           setPlayer(fetchedPlayer);
           
@@ -94,7 +96,7 @@ export default function App() {
           if (regError) {
             console.error("Error fetching registrations", regError);
           } else if (regData) {
-            const formattedRegs: Registration[] = regData.map(reg => ({
+            const formattedRegs: Registration[] = (regData as any[]).map(reg => ({
                 ...reg,
                 tournamentName: reg.tournaments?.name || 'N/A'
             }));

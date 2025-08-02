@@ -119,3 +119,14 @@ export const YoutubeIcon: React.FC<{ className?: string }> = ({ className }) => 
 export const TwitchIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M2.149 0l-1.612 4.119v16.836h5.731v3.045h3.223l3.045-3.045h4.657l6.269-6.269v-14.686h-21.313zm18.687 13.612l-3.582 3.582h-5.731l-3.045 3.045v-3.045h-4.836v-15.015h17.194v11.433zm-3.582-7.343v6.269h-2.149v-6.269h2.149zm-4.836 0v6.269h-2.149v-6.269h2.149z"/></svg>
 );
+
+export const NKGLogoIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 190 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-label="NKG Logo">
+        {/* N part */}
+        <path d="M20 0 L 20 100 L 35 100 L 65 30 L 65 100 L 80 100 L 80 0 L 65 0 L 35 70 L 35 0 L 20 0 Z" fill="#96F01D"/>
+        {/* K part */}
+        <path d="M105 0 L 80 50 L 105 100 L 120 100 L 95 50 L 120 0 L 105 0 Z" fill="#FFFFFF"/>
+        {/* G part */}
+        <path d="M180 50 C 180 74.8528 159.853 95 135 95 L 135 80 C 151.569 80 165 66.5685 165 50 C 165 33.4315 151.569 20 135 20 L 135 5 C 159.853 5 180 25.1472 180 50 Z M135 57.5 H 155 V 42.5 H 135 V 57.5 Z" fill="#E5A83D"/>
+    </svg>
+);

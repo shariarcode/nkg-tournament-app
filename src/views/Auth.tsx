@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { GoogleIcon } from '../components/Icons';
+import { GoogleIcon, NKGLogoIcon } from '../components/Icons';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const Auth: React.FC = () => {
@@ -127,9 +127,8 @@ const Auth: React.FC = () => {
     <div className="min-h-screen bg-dark-1 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-            <img src="/favicon.svg" alt="NKG Logo" className="h-16 w-16 mx-auto"/>
-            <h1 className="text-5xl font-display text-white mt-4">NKG</h1>
-            <p className="text-light-2 mt-2 font-sans">{getPageTitle()}</p>
+            <NKGLogoIcon className="h-16 w-auto mx-auto"/>
+            <p className="text-light-2 mt-4 font-sans">{getPageTitle()}</p>
         </div>
         
         <div className="bg-dark-2 border border-white/10 rounded-xl shadow-2xl p-8">
