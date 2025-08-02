@@ -1,5 +1,7 @@
 
 
+
+
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent } from '../types';
@@ -137,19 +139,29 @@ const AdminDashboard: React.FC = () => {
   const fetchAdminData = async () => {
       setLoadingRegistrations(true);
       try {
-          const { data, error } = await supabase.from('registrations').select('*, profiles(name, free_fire_id), tournaments(name)');
-          if (error) throw error;
-          if (data) {
-            const formattedData: Registration[] = (data as any[]).map(r => {
-                return {
-                    ...r,
-                    playerName: r.profiles?.name || 'Unknown Player',
-                    playerFreeFireId: r.profiles?.free_fire_id || 'N/A',
-                    tournamentName: r.tournaments?.name || 'Unknown Tournament'
-                };
-            });
-            setAllRegistrations(formattedData);
-          }
+          const regsPromise = supabase.from('registrations').select('*');
+          const profilesPromise = supabase.from('profiles').select('id, name, free_fire_id');
+          
+          const [regsResult, profilesResult] = await Promise.all([regsPromise, profilesPromise]);
+
+          if (regsResult.error) throw regsResult.error;
+          if (profilesResult.error) throw profilesResult.error;
+          
+          const allRegs = regsResult.data || [];
+          const allProfiles = profilesResult.data || [];
+          const profilesMap = new Map(allProfiles.map(p => [p.id, { name: p.name, free_fire_id: p.free_fire_id }]));
+
+          const formattedData: Registration[] = allRegs.map(r => {
+              const profile = profilesMap.get(r.player_id);
+              const tournament = tournaments.find(t => t.id === r.tournament_id);
+              return {
+                  ...r,
+                  playerName: profile?.name || 'Unknown Player',
+                  playerFreeFireId: profile?.free_fire_id || 'N/A',
+                  tournamentName: tournament?.name || 'Unknown Tournament'
+              };
+          });
+          setAllRegistrations(formattedData);
       } catch (error) {
           console.error("Error fetching registrations for admin:", error);
           alert("Could not fetch registrations.");
@@ -168,7 +180,7 @@ const AdminDashboard: React.FC = () => {
         const { data, error } = await supabase.from('site_content').select('*');
         if (error) console.error("Error fetching site content for admin:", error);
 
-        const dbContentMap = (data || []).reduce((acc, item) => {
+        const dbContentMap = ((data || []) as any as SiteContentEntry[]).reduce((acc, item) => {
             acc[item.key] = item;
             return acc;
         }, {} as Record<string, SiteContentEntry>);
@@ -196,7 +208,7 @@ const AdminDashboard: React.FC = () => {
     };
     fetchContentForAdmin();
 
-  }, [leaderboard]);
+  }, [leaderboard, tournaments]);
   
   useEffect(() => {
       const channel = supabase
@@ -300,7 +312,7 @@ const AdminDashboard: React.FC = () => {
           return;
       }
 
-      const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'key' });
+      const { error } = await (supabase.from('site_content') as any).upsert(updates, { onConflict: 'key' });
 
       if (error) {
           alert("Error saving content: " + error.message);

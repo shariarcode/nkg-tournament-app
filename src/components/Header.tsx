@@ -1,4 +1,5 @@
 
+
 import React, { useContext } from 'react';
 import { View, AppContext, AppContextType } from '../contexts/AppContext';
 import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, NKGLogoIcon } from './Icons';
@@ -9,6 +10,7 @@ interface HeaderProps {
   isAdminView: boolean;
   onSetIsAdminView: React.Dispatch<React.SetStateAction<boolean>>;
   isUserAdmin: boolean;
+  onSearchClick: () => void;
 }
 
 const NavItem: React.FC<{
@@ -30,7 +32,7 @@ const NavItem: React.FC<{
   </button>
 );
 
-const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, isAdminView, onSetIsAdminView }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, isAdminView, onSetIsAdminView, onSearchClick }) => {
   const { player, signOut } = useContext(AppContext) as AppContextType;
 
   return (
@@ -64,7 +66,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           </nav>
           
           <div className="flex items-center space-x-4">
-              <button className="text-light-2 hover:text-white"><SearchIcon className="h-5 w-5"/></button>
+              <button onClick={onSearchClick} className="text-light-2 hover:text-white"><SearchIcon className="h-5 w-5"/></button>
               <div className="w-px h-6 bg-white/20"></div>
               <div className="flex items-center space-x-2">
                  <img src={player.profilePicUrl} alt="Player" className="h-9 w-9 rounded-full border-2 border-brand-green object-cover"/>

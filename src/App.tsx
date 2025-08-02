@@ -1,8 +1,10 @@
 
 
+
+
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
-import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile, SiteContent, SiteContentEntry } from './types';
+import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile, SiteContent, SiteContentEntry, DbRegistration } from './types';
 import { MOCK_TOURNAMENTS, MOCK_LEADERBOARD, ANONYMOUS_PLAYER } from './constants';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -16,6 +18,7 @@ import AdminDashboard from './views/AdminDashboard';
 import AIChat from './components/AIChat';
 import Auth from './views/Auth';
 import TournamentDetails from './views/TournamentDetails';
+import SearchModal from './components/SearchModal';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -28,6 +31,7 @@ export default function App() {
   const [selectedTournamentForDetails, setSelectedTournamentForDetails] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
   const [siteContent, setSiteContent] = useState<SiteContent>({});
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     // Fetch initial data
@@ -42,17 +46,17 @@ export default function App() {
 
         const { data: tourneyData, error: tourneyError } = tourneyResult;
         if (tourneyError) throw tourneyError;
-        setTournaments((tourneyData as Tournament[]) || []);
+        setTournaments(((tourneyData as any) as Tournament[]) || []);
 
         const { data: leaderboardData, error: leaderboardError } = leaderboardResult;
         if (leaderboardError) throw leaderboardError;
-        setLeaderboard((leaderboardData as LeaderboardEntry[]) || []);
+        setLeaderboard(((leaderboardData as any) as LeaderboardEntry[]) || []);
         
         const { data: contentData, error: contentError } = contentResult;
         if (contentError) {
           console.error("Error fetching site content:", contentError);
         } else if (contentData) {
-          const contentMap = (contentData as SiteContentEntry[]).reduce((acc, item) => {
+          const contentMap = ((contentData as any) as SiteContentEntry[]).reduce((acc, item) => {
             acc[item.key] = item.value;
             return acc;
           }, {} as SiteContent);
@@ -94,7 +98,7 @@ export default function App() {
           console.error('Error fetching user profile:', error);
           await handleSignOut();
         } else if (profile) {
-          const typedProfile = profile as SupabaseProfile;
+          const typedProfile = profile as any as SupabaseProfile;
           const fetchedPlayer: Player = {
             id: typedProfile.id,
             name: typedProfile.name || 'New Player',
@@ -110,15 +114,15 @@ export default function App() {
           // Fetch user-specific registrations
           const { data: regData, error: regError } = await supabase
             .from('registrations')
-            .select('*, tournaments(name)')
+            .select('*')
             .eq('player_id', session.user.id);
 
           if (regError) {
             console.error("Error fetching registrations", regError);
           } else if (regData) {
-            const formattedRegs: Registration[] = (regData as any[]).map(reg => ({
+            const formattedRegs: Registration[] = (regData as DbRegistration[]).map(reg => ({
                 ...reg,
-                tournamentName: reg.tournaments?.name || 'N/A'
+                tournamentName: tournaments.find(t => t.id === reg.tournament_id)?.name || 'N/A'
             }));
             setRegistrations(formattedRegs);
           }
@@ -132,7 +136,7 @@ export default function App() {
     };
 
     fetchUserAndRegistrations();
-  }, [session]);
+  }, [session, tournaments]);
   
 
   const navigate = useCallback((view: View) => {
@@ -203,11 +207,19 @@ export default function App() {
   return (
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen bg-dark-1 text-light-1 font-sans">
-        <Header currentView={currentView} onNavigate={navigate} isAdminView={isAdminView} onSetIsAdminView={setIsAdminView} isUserAdmin={!!player.isAdmin} />
+        <Header 
+            currentView={currentView} 
+            onNavigate={navigate} 
+            isAdminView={isAdminView} 
+            onSetIsAdminView={setIsAdminView} 
+            isUserAdmin={!!player.isAdmin} 
+            onSearchClick={() => setIsSearchOpen(true)}
+        />
         <main className="container mx-auto px-4 py-8 md:py-16">
           {renderView()}
         </main>
         <AIChat />
+        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       </div>
     </AppContext.Provider>
   );
