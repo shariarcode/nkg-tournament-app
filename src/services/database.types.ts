@@ -1,3 +1,4 @@
+
 export type Json =
   | string
   | number
@@ -95,14 +96,14 @@ export interface Database {
           {
             foreignKeyName: "registrations_player_id_fkey"
             columns: ["player_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "registrations_tournament_id_fkey"
             columns: ["tournament_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "tournaments"
             referencedColumns: ["id"]
           },

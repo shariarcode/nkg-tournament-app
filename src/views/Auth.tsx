@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import { GoogleIcon } from '../components/Icons';
@@ -126,8 +127,8 @@ const Auth: React.FC = () => {
     <div className="min-h-screen bg-dark-1 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-            <img src="/favicon.svg" alt="Bame Logo" className="h-16 w-16 mx-auto"/>
-            <h1 className="text-5xl font-display text-white mt-4">BAME</h1>
+            <img src="/favicon.svg" alt="NKG Logo" className="h-16 w-16 mx-auto"/>
+            <h1 className="text-5xl font-display text-white mt-4">NKG</h1>
             <p className="text-light-2 mt-2 font-sans">{getPageTitle()}</p>
         </div>
         

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import { ChatMessage } from '../types';
 import { getAIStream } from '../services/geminiService';
@@ -71,7 +72,7 @@ const AIChat: React.FC = () => {
       <div className={`fixed bottom-0 right-0 sm:bottom-5 sm:right-5 h-full w-full sm:h-[70vh] sm:max-h-[600px] sm:w-[400px] bg-dark-2 border-t-4 sm:border-4 border-brand-green rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-in-out ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
         {/* Header */}
         <div className="flex justify-between items-center p-4 bg-dark-3/50 rounded-t-2xl sm:rounded-t-xl">
-          <h3 className="text-lg font-bold text-white">Bame Assistant</h3>
+          <h3 className="text-lg font-bold text-white">NKG Assistant</h3>
           <button onClick={() => setIsOpen(false)} className="text-light-2 hover:text-white">
             <XMarkIcon className="h-6 w-6" />
           </button>
@@ -82,7 +83,7 @@ const AIChat: React.FC = () => {
           <div className="flex space-x-2">
             <span className="flex-shrink-0 h-8 w-8 rounded-full bg-brand-green text-dark-1 font-display flex items-center justify-center font-bold text-sm">AI</span>
             <div className="bg-dark-3 rounded-lg p-3 max-w-xs text-sm">
-              <p>Hello! I'm the Bame Assistant. How can I help you with our tournaments today?</p>
+              <p>Hello! I'm the NKG Assistant. How can I help you with our tournaments today?</p>
             </div>
           </div>
           {messages.map((msg) => (
