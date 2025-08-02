@@ -102,10 +102,10 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-      <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700 animate-fade-in-up">
-        <div className="flex justify-between items-center p-4 border-b border-gray-700">
-          <h2 className="text-2xl font-bold text-white">Join: <span className="text-red-500">{tournament.name}</span></h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+      <div className="bg-dark-2 rounded-xl shadow-2xl w-full max-w-lg border border-white/10 animate-fade-in-up">
+        <div className="flex justify-between items-center p-4 border-b border-white/20">
+          <h2 className="text-2xl font-bold text-white">Join: <span className="text-brand-green">{tournament.name}</span></h2>
+          <button onClick={onClose} className="text-light-2 hover:text-white">
             <XMarkIcon className="h-7 w-7" />
           </button>
         </div>
@@ -114,8 +114,8 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
           <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
             {/* Player Info */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-300 mb-2">Player Information</h3>
-              <div className="bg-gray-900/50 p-4 rounded-lg space-y-2">
+              <h3 className="text-lg font-semibold text-light-1 mb-2">Player Information</h3>
+              <div className="bg-dark-3 p-4 rounded-lg space-y-2 font-sans">
                 <p><strong>Name:</strong> {player.name}</p>
                 <p><strong>Free Fire ID:</strong> {player.freeFireId}</p>
                 <p><strong>Phone:</strong> {player.phone}</p>
@@ -124,37 +124,37 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
 
             {/* Payment Info */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-300 mb-2">Payment Details</h3>
-              <p className="text-sm text-yellow-400 mb-4 bg-yellow-900/50 p-3 rounded-lg">Pay <strong className="text-white">{tournament.entry_fee} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
+              <h3 className="text-lg font-semibold text-light-1 mb-2">Payment Details</h3>
+              <p className="text-sm text-yellow-200 mb-4 bg-yellow-900/50 p-3 rounded-lg font-sans">Pay <strong className="text-white">{tournament.entry_fee} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
               <div className="space-y-4">
-                 <input type="tel" placeholder="Your bKash Number" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                 <input type="tel" placeholder="Last 4 Digits of Transaction ID" value={bkashLast4} onChange={(e) => setBkashLast4(e.target.value)} maxLength={4} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                 <input type="tel" placeholder="Your bKash Number" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} required className="input-field" />
+                 <input type="tel" placeholder="Last 4 Digits of Transaction ID" value={bkashLast4} onChange={(e) => setBkashLast4(e.target.value)} maxLength={4} required className="input-field" />
               </div>
             </div>
             
             {/* Screenshot Upload */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-300 mb-2">Upload Payment Screenshot</h3>
+              <h3 className="text-lg font-semibold text-light-1 mb-2">Upload Payment Screenshot</h3>
               <div 
-                className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-red-500 transition-colors"
+                className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center cursor-pointer hover:border-brand-green transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" required className="hidden" />
                 {screenshotPreview ? (
                   <img src={screenshotPreview} alt="Payment Preview" className="max-h-40 mx-auto rounded-lg" />
                 ) : (
-                  <div className="text-gray-400">
+                  <div className="text-light-2">
                     <ArrowUpTrayIcon className="h-12 w-12 mx-auto mb-2 text-gray-500"/>
                     <p>Click to upload</p>
-                    <p className="text-xs">PNG, JPG up to 5MB</p>
+                    <p className="text-xs font-sans">PNG, JPG up to 5MB</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="p-4 bg-gray-900/50 border-t border-gray-700">
-            <button type="submit" disabled={isSubmitting} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:bg-gray-500 disabled:cursor-wait">
+          <div className="p-4 bg-dark-1/50 border-t border-white/20">
+            <button type="submit" disabled={isSubmitting} className="w-full btn btn-primary disabled:bg-gray-500 disabled:cursor-wait">
               {isSubmitting ? 'Submitting...' : 'Submit Registration'}
             </button>
           </div>

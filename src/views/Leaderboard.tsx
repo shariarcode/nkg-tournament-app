@@ -1,44 +1,51 @@
 import React, { useContext } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
-import { TrophyIcon } from '../components/Icons';
 
 const Leaderboard: React.FC = () => {
     const { leaderboard } = useContext(AppContext) as AppContextType;
 
-    const getRankColor = (rank: number) => {
-        if (rank === 1) return 'bg-yellow-500 text-yellow-900';
-        if (rank === 2) return 'bg-gray-400 text-gray-800';
-        if (rank === 3) return 'bg-yellow-600 text-yellow-100';
-        return 'bg-gray-700 text-gray-300';
+    const getBorderColor = (rank: number) => {
+        if (rank === 1) return 'border-brand-yellow';
+        if (rank === 2) return 'border-pink-500';
+        if (rank === 3) return 'border-brand-green';
+        if (rank === 4) return 'border-sky-400';
+        return 'border-gray-700';
+    };
+    
+    const getGlowColor = (rank: number) => {
+        if (rank === 1) return 'hover:shadow-yellow-glow';
+        if (rank === 2) return 'hover:shadow-[0_0_20px_rgba(236,72,153,0.5)]'; // pink glow
+        if (rank === 3) return 'hover:shadow-green-glow';
+        if (rank === 4) return 'hover:shadow-[0_0_20px_rgba(56,189,248,0.5)]'; // sky glow
+        return 'hover:shadow-[0_0_15px_rgba(100,116,139,0.4)]';
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-12">
             <div className="text-center">
-                <h1 className="text-4xl font-bold text-white">Top Players Leaderboard</h1>
-                <p className="mt-2 text-gray-400">See who's dominating the competition.</p>
+                <p className="text-brand-green font-display tracking-widest"># Top World Class Gamer</p>
+                <h1 className="text-4xl md:text-5xl font-bold text-white">Let's See Our Pro Players</h1>
             </div>
 
-            <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
-                <ul className="divide-y divide-gray-700">
-                    {leaderboard.map((player, index) => (
-                        <li key={player.id} className={`flex items-center p-4 transition-colors duration-200 ${index === 0 ? 'bg-red-500/10' : 'hover:bg-gray-700/50'}`}>
-                            <div className="flex items-center space-x-4 w-full">
-                                <span className={`flex-shrink-0 w-10 h-10 flex items-center justify-center font-bold text-lg rounded-full ${getRankColor(player.rank || 0)}`}>
-                                    {player.rank}
-                                </span>
-                                <img src={player.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${player.player_name}`} alt={player.player_name} className="w-12 h-12 rounded-full object-cover border-2 border-gray-600" />
-                                <div className="flex-1">
-                                    <p className="text-lg font-semibold text-white">{player.player_name}</p>
-                                </div>
-                                <div className="flex items-center text-green-400 font-bold text-lg">
-                                    <TrophyIcon className="w-5 h-5 mr-2 text-green-500" />
-                                    <span>{player.winnings.toLocaleString()} BDT</span>
-                                </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
+                {leaderboard.slice(0, 5).map((player, index) => (
+                    <div 
+                        key={player.id} 
+                        className="group animate-fade-in-up" 
+                        style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                        <div className={`relative rounded-2xl border-2 ${getBorderColor(player.rank || 0)} bg-dark-2 p-1.5 transition-all duration-300 group-hover:-translate-y-2 ${getGlowColor(player.rank || 0)}`}>
+                            <img 
+                                src={player.profile_pic_url || `https://api.dicebear.com/8.x/bottts-neutral/svg?seed=${player.player_name}`} 
+                                alt={player.player_name} 
+                                className="w-full h-auto rounded-xl object-cover aspect-[3/4]"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 p-3 text-center bg-dark-2/50 backdrop-blur-sm rounded-b-xl">
+                                <h3 className="font-display text-base text-white uppercase tracking-wider truncate">{player.player_name}</h3>
                             </div>
-                        </li>
-                    ))}
-                </ul>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

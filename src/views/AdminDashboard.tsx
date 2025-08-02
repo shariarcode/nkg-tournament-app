@@ -55,35 +55,35 @@ const TournamentModalForm: React.FC<{
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4">
-            <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg border border-gray-700 animate-fade-in-up">
-                <div className="flex justify-between items-center p-4 border-b border-gray-700">
+            <div className="bg-dark-2 rounded-xl shadow-2xl w-full max-w-lg border border-white/10 animate-fade-in-up">
+                <div className="flex justify-between items-center p-4 border-b border-white/20">
                     <h2 className="text-2xl font-bold text-white">{isEditing ? 'Edit' : 'Add New'} Tournament</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white"><XMarkIcon className="w-6 h-6"/></button>
+                    <button onClick={onClose} className="text-light-2 hover:text-white"><XMarkIcon className="w-6 h-6"/></button>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
-                    <input type="text" placeholder="Tournament Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                    <input type="text" placeholder="Tournament Name" value={name} onChange={e => setName(e.target.value)} required className="input-field" />
                     <div className="grid grid-cols-2 gap-4">
-                        <input type="text" placeholder="Date (e.g., Aug 10, 2024)" value={date} onChange={e => setDate(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="text" placeholder="Time (e.g., 8:00 PM)" value={time} onChange={e => setTime(e.target.value)} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="text" placeholder="Date (e.g., Aug 10, 2024)" value={date} onChange={e => setDate(e.target.value)} required className="input-field" />
+                        <input type="text" placeholder="Time (e.g., 8:00 PM)" value={time} onChange={e => setTime(e.target.value)} required className="input-field" />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
-                        <input type="number" placeholder="Entry Fee" value={entryFee} onChange={e => setEntryFee(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="number" placeholder="Prize Pool" value={prizePool} onChange={e => setPrizePool(Number(e.target.value))} required className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="number" placeholder="Entry Fee" value={entryFee} onChange={e => setEntryFee(Number(e.target.value))} required className="input-field" />
+                        <input type="number" placeholder="Prize Pool" value={prizePool} onChange={e => setPrizePool(Number(e.target.value))} required className="input-field" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                        <input type="text" placeholder="Room ID (optional)" value={roomId} onChange={e => setRoomId(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
-                        <input type="text" placeholder="Room Password (optional)" value={roomPassword} onChange={e => setRoomPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" />
+                        <input type="text" placeholder="Room ID (optional)" value={roomId || ''} onChange={e => setRoomId(e.target.value)} className="input-field" />
+                        <input type="text" placeholder="Room Password (optional)" value={roomPassword || ''} onChange={e => setRoomPassword(e.target.value)} className="input-field" />
                     </div>
                      <div>
-                        <label className="text-gray-400 text-sm">Status</label>
-                        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <label className="text-light-2 text-sm font-sans">Status</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="input-field">
                             <option value="Upcoming">Upcoming</option>
                             <option value="Ongoing">Ongoing</option>
                             <option value="Finished">Finished</option>
                         </select>
                     </div>
-                    <div className="p-4 bg-gray-900/50 border-t border-gray-700 -m-6 mt-6 pt-6">
-                        <button type="submit" disabled={isSubmitting} className="w-full bg-green-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-500 disabled:cursor-wait">
+                    <div className="p-4 bg-dark-1/50 border-t border-white/20 -m-6 mt-6 pt-6">
+                        <button type="submit" disabled={isSubmitting} className="w-full btn bg-brand-green text-dark-1 hover:bg-opacity-80 disabled:bg-gray-500 disabled:cursor-wait">
                             {isSubmitting ? 'Saving...' : (isEditing ? 'Save Changes' : 'Add Tournament')}
                         </button>
                     </div>
@@ -96,8 +96,6 @@ const TournamentModalForm: React.FC<{
 
 const AdminDashboard: React.FC = () => {
   const { 
-    notice, 
-    setNotice, 
     tournaments,
     setTournaments, 
     leaderboard,
@@ -105,7 +103,6 @@ const AdminDashboard: React.FC = () => {
   } = useContext(AppContext) as AppContextType;
 
   const [allRegistrations, setAllRegistrations] = useState<Registration[]>([]);
-  const [newNotice, setNewNotice] = useState(notice);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editableLeaderboard, setEditableLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -137,61 +134,39 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     fetchAdminData();
-    // Deep copy leaderboard to avoid direct state mutation
     setEditableLeaderboard(JSON.parse(JSON.stringify(leaderboard)));
   }, [leaderboard]);
   
-  // Realtime listener for new registrations
   useEffect(() => {
       const channel = supabase
         .channel('public:registrations')
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'registrations' },
-          () => {
-             fetchAdminData(); // Refetch all data on new registration
-          }
+          () => { fetchAdminData(); }
         )
         .subscribe();
       
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => { supabase.removeChannel(channel); };
   }, []);
-
-  const handleUpdateNotice = () => {
-    // In a real app, this would be saved to a database table.
-    // For now, this remains a client-side only feature.
-    setNotice(newNotice);
-    alert("Notice updated!");
-  };
   
   const approveRegistration = async (registrationId: number) => {
     const update: RegistrationUpdate = { status: 'Approved' };
-    const { error } = await supabase
-      .from('registrations')
-      .update(update)
-      .eq('id', registrationId);
-
-    if (error) {
-      alert(`Error approving registration: ${error.message}`);
-    } else {
+    const { error } = await supabase.from('registrations').update(update).eq('id', registrationId);
+    if (error) alert(`Error approving registration: ${error.message}`);
+    else {
       setAllRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status: 'Approved' } : r));
       alert("Registration approved.");
     }
   };
 
   const handleLeaderboardChange = (id: number, field: keyof LeaderboardEntry, value: string | number) => {
-    setEditableLeaderboard(current =>
-      current.map(entry =>
-        entry.id === id ? { ...entry, [field as keyof LeaderboardEntry]: value as never } : entry
-      )
-    );
+    setEditableLeaderboard(current => current.map(entry => entry.id === id ? { ...entry, [field as keyof LeaderboardEntry]: value as never } : entry));
   };
 
   const handleAddLeaderboardEntry = () => {
     const newEntry: LeaderboardEntry = {
-      id: Date.now(), // Temporary client-side ID
+      id: Date.now(),
       rank: editableLeaderboard.length + 1,
       player_name: 'New Player',
       winnings: 0,
@@ -206,63 +181,41 @@ const AdminDashboard: React.FC = () => {
   
   const handleSaveLeaderboard = async () => {
     const sorted = [...editableLeaderboard].sort((a, b) => b.winnings - a.winnings);
-    const ranked = sorted.map((entry, index) => ({ 
-        ...entry, 
-        rank: index + 1,
-    }));
+    const ranked = sorted.map((entry, index) => ({ ...entry, rank: index + 1 }));
     
     const { error: deleteError } = await supabase.from('leaderboard').delete().neq('id', -1);
-     if(deleteError) {
-        alert("Error clearing leaderboard: " + deleteError.message);
-        return;
-    }
+    if(deleteError) { alert("Error clearing leaderboard: " + deleteError.message); return; }
     
     const insertableData: LeaderboardInsert[] = ranked.map(({ id, ...rest }) => rest);
     const { data: insertedData, error: insertError } = await supabase.from('leaderboard').insert(insertableData).select();
 
-    if (insertError) {
-        alert("Error saving leaderboard: " + insertError.message);
-    } else {
-        setLeaderboard(insertedData || []);
-        alert("Leaderboard saved successfully!");
+    if (insertError) alert("Error saving leaderboard: " + insertError.message);
+    else {
+      setLeaderboard(insertedData || []);
+      alert("Leaderboard saved successfully!");
     }
   };
   
   const handleSaveTournament = async (tournamentData: TournamentInsert | TournamentUpdate) => {
     if (editingTournament) { // Edit
         const { data, error } = await supabase.from('tournaments').update(tournamentData).eq('id', editingTournament.id).select().single();
-        if (error) {
-            alert(error.message);
-            throw error;
-        }
+        if (error) { alert(error.message); throw error; }
         else if (data) setTournaments(ts => ts.map(t => t.id === data.id ? data : t));
     } else { // Add
         const { data, error } = await supabase.from('tournaments').insert(tournamentData as TournamentInsert).select().single();
-        if (error) {
-            alert(error.message);
-            throw error;
-        }
+        if (error) { alert(error.message); throw error; }
         else if (data) setTournaments(ts => [data, ...ts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     }
   };
 
   const handleDeleteTournament = async (tournamentId: number) => {
-    if (!window.confirm("Are you sure you want to delete this tournament? This action is permanent and cannot be undone.")) {
-        return;
-    }
-
+    if (!window.confirm("Are you sure you want to delete this tournament? This action is permanent.")) return;
     try {
-        const { error } = await supabase
-            .from('tournaments')
-            .delete()
-            .eq('id', tournamentId);
-
+        const { error } = await supabase.from('tournaments').delete().eq('id', tournamentId);
         if (error) throw error;
-        
         setTournaments(ts => ts.filter(t => t.id !== tournamentId));
         alert("Tournament deleted successfully.");
     } catch (error: any) {
-        console.error("Error deleting tournament:", error);
         alert(`Failed to delete tournament: ${error.message}`);
     }
   };
@@ -271,39 +224,25 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-bold text-yellow-400">Admin Dashboard</h1>
-
-      {/* Notice Management */}
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-        <h2 className="text-2xl font-bold mb-4 text-white">Update Notice Banner</h2>
-        <textarea
-          value={newNotice}
-          onChange={(e) => setNewNotice(e.target.value)}
-          className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
-          rows={3}
-        />
-        <button onClick={handleUpdateNotice} className="bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">
-          Update Notice
-        </button>
-      </div>
+      <h1 className="text-4xl font-bold text-brand-yellow">Admin Dashboard</h1>
       
       {/* Tournament Management */}
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+      <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
         <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-white">Manage Tournaments</h2>
-            <button onClick={() => { setEditingTournament(null); setShowAddModal(true); }} className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+            <button onClick={() => { setEditingTournament(null); setShowAddModal(true); }} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80">
                 Add Tournament
             </button>
         </div>
         <div className="space-y-2">
             {tournaments.map(t => (
-                <div key={t.id} className="bg-gray-700 p-3 rounded-lg flex justify-between items-center">
+                <div key={t.id} className="bg-dark-3 p-3 rounded-lg flex justify-between items-center">
                     <div>
-                      <p className="text-white">{t.name}</p>
-                      <p className="text-xs text-gray-400">Room ID: {t.room_id || 'Not set'} | Pass: {t.room_password || 'Not set'}</p>
+                      <p className="text-white font-sans font-semibold">{t.name}</p>
+                      <p className="text-xs text-light-2 font-sans">Room ID: {t.room_id || 'Not set'} | Pass: {t.room_password || 'Not set'}</p>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <button onClick={() => { setEditingTournament(t); setShowAddModal(true); }} className="text-sm text-yellow-400 hover:underline flex items-center space-x-1">
+                        <button onClick={() => { setEditingTournament(t); setShowAddModal(true); }} className="text-sm text-brand-yellow hover:underline flex items-center space-x-1">
                           <PencilIcon className="w-4 h-4" />
                           <span>Edit</span>
                         </button>
@@ -318,79 +257,53 @@ const AdminDashboard: React.FC = () => {
       </div>
       
       {/* Leaderboard Management */}
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+      <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
         <h2 className="text-2xl font-bold mb-4 text-white">Manage Leaderboard</h2>
         <div className="space-y-3">
           {editableLeaderboard.map((entry, index) => (
-            <div key={entry.id} className="flex items-center gap-4 bg-gray-700 p-2 rounded-lg">
-              <span className="font-bold text-gray-400 w-6 text-center">{index + 1}</span>
-              <input
-                type="text"
-                value={entry.player_name}
-                onChange={(e) => handleLeaderboardChange(entry.id, 'player_name', e.target.value)}
-                className="flex-1 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white"
-                placeholder="Player Name"
-              />
-              <input
-                type="number"
-                value={entry.winnings}
-                onChange={(e) => handleLeaderboardChange(entry.id, 'winnings', Number(e.target.value))}
-                className="w-32 bg-gray-600 border border-gray-500 rounded px-2 py-1 text-white"
-                placeholder="Winnings"
-              />
-              <button onClick={() => handleDeleteLeaderboardEntry(entry.id)} className="text-red-500 hover:text-red-400 p-1">
-                  <XMarkIcon className="w-5 h-5"/>
-              </button>
+            <div key={entry.id} className="flex items-center gap-4 bg-dark-3 p-2 rounded-lg">
+              <span className="font-bold text-light-2 w-6 text-center">{index + 1}</span>
+              <input type="text" value={entry.player_name} onChange={(e) => handleLeaderboardChange(entry.id, 'player_name', e.target.value)} className="flex-1 input-field !py-1" placeholder="Player Name" />
+              <input type="number" value={entry.winnings} onChange={(e) => handleLeaderboardChange(entry.id, 'winnings', Number(e.target.value))} className="w-32 input-field !py-1" placeholder="Winnings" />
+              <button onClick={() => handleDeleteLeaderboardEntry(entry.id)} className="text-red-500 hover:text-red-400 p-1"><XMarkIcon className="w-5 h-5"/></button>
             </div>
           ))}
         </div>
         <div className="mt-4 flex gap-4">
-            <button onClick={handleAddLeaderboardEntry} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
-                Add Entry
-            </button>
-            <button onClick={handleSaveLeaderboard} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition">
-                Save Leaderboard
-            </button>
+            <button onClick={handleAddLeaderboardEntry} className="btn bg-blue-600 text-white hover:bg-blue-500">Add Entry</button>
+            <button onClick={handleSaveLeaderboard} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80">Save Leaderboard</button>
         </div>
       </div>
 
       {/* Payment Approval */}
-      <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+      <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
         <h2 className="text-2xl font-bold mb-4 text-white">Pending Approvals ({pendingRegistrations.length})</h2>
-        {loadingRegistrations ? <p className="text-gray-400">Loading registrations...</p> : 
+        {loadingRegistrations ? <p className="text-light-2">Loading registrations...</p> : 
          pendingRegistrations.length > 0 ? (
           <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
             {pendingRegistrations.map(reg => (
-              <div key={reg.id} className="bg-gray-700 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div key={reg.id} className="bg-dark-3 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-4 font-sans">
                 <a href={reg.payment_screenshot_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                  <img src={reg.payment_screenshot_url} alt="Payment screenshot" className="w-24 h-24 object-cover rounded-md border-2 border-gray-500 hover:border-red-500 transition-colors" />
+                  <img src={reg.payment_screenshot_url} alt="Payment screenshot" className="w-24 h-24 object-cover rounded-md border-2 border-white/20 hover:border-brand-green transition-colors" />
                 </a>
                 <div className="flex-1">
                   <p className="font-bold text-white">{reg.playerName}</p>
-                  <p className="text-sm text-gray-300">Game ID: <span className="font-mono">{reg.playerFreeFireId}</span></p>
-                  <p className="text-sm text-gray-300">Tournament: {reg.tournamentName}</p>
-                  <p className="text-sm text-gray-400">bKash No: <span className="font-mono">{reg.bkash_number}</span></p>
-                  <p className="text-sm text-gray-400">TID ends with: <span className="font-mono">{reg.bkash_last4}</span></p>
+                  <p className="text-sm text-light-1">Game ID: <span className="font-mono">{reg.playerFreeFireId}</span></p>
+                  <p className="text-sm text-light-2">Tournament: {reg.tournamentName}</p>
+                  <p className="text-sm text-light-2">bKash No: <span className="font-mono">{reg.bkash_number}</span></p>
+                  <p className="text-sm text-light-2">TID ends with: <span className="font-mono">{reg.bkash_last4}</span></p>
                 </div>
                 <div className="flex-shrink-0 self-center sm:self-auto">
-                  <button onClick={() => approveRegistration(reg.id)} className="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition w-full">
-                    Approve
-                  </button>
+                  <button onClick={() => approveRegistration(reg.id)} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80 w-full">Approve</button>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-400">No pending approvals.</p>
+          <p className="text-light-2">No pending approvals.</p>
         )}
       </div>
-      {(showAddModal) && 
-        <TournamentModalForm 
-          onClose={() => { setShowAddModal(false); setEditingTournament(null); }} 
-          onSave={handleSaveTournament} 
-          tournament={editingTournament}
-        />
-      }
+      {(showAddModal) && <TournamentModalForm onClose={() => { setShowAddModal(false); setEditingTournament(null); }} onSave={handleSaveTournament} tournament={editingTournament} /> }
     </div>
   );
 };

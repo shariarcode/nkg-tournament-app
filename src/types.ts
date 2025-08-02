@@ -40,3 +40,10 @@ export interface ChatMessage {
   text: string;
   isStreaming?: boolean;
 }
+
+export interface Game {
+  id: number;
+  title: string;
+  imageUrl: string;
+  entryFee: string;
+}

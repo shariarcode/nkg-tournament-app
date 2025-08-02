@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
-import { TrophyIcon, GoogleIcon } from '../components/Icons';
+import { GoogleIcon } from '../components/Icons';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const Auth: React.FC = () => {
@@ -14,15 +14,9 @@ const Auth: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
 
-  // Use the current origin for the redirect URL.
-  // This makes the app more robust as it will work for any development port
-  // and also for the production deployment.
-  // IMPORTANT: Ensure this URL is added to your Supabase Auth URL configuration.
-  // For local development, you might add: http://localhost:5173/**
   const REDIRECT_URL = typeof window !== 'undefined' ? window.location.origin : '';
 
   useEffect(() => {
-    // Listen for password recovery or magic link sign in
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
@@ -83,15 +77,12 @@ const Auth: React.FC = () => {
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: {
-            redirectTo: REDIRECT_URL,
-        },
+        options: { redirectTo: REDIRECT_URL },
     });
     if (error) {
         setError(error.message);
         setLoading(false);
     }
-    // On success, Supabase handles the redirect.
   };
 
   const handlePasswordRecovery = async (e: React.FormEvent) => {
@@ -99,7 +90,7 @@ const Auth: React.FC = () => {
     setLoading(true);
     setError(null);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: REDIRECT_URL, // This will redirect user back to the app after clicking the link
+        redirectTo: REDIRECT_URL,
     });
     if (error) setError(error.message);
     else setMessage("Password recovery link sent! Please check your email.");
@@ -126,37 +117,35 @@ const Auth: React.FC = () => {
 
   const getPageTitle = () => {
       if (authMode === 'recover') return 'Recover Your Account';
-      if (authMode === 'signUp') return "Create your account to start competing";
+      if (authMode === 'signUp') return "Create Your Account to Start Competing";
       if (authMode === 'updatePassword') return "Create a New Password";
-      return "Sign in to join the battle";
+      return "Sign in to Join the Battle";
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col justify-center items-center p-4">
+    <div className="min-h-screen bg-dark-1 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-            <TrophyIcon className="h-16 w-16 text-red-500 mx-auto" />
-            <h1 className="text-4xl font-extrabold text-white mt-2">
-                NKG <span className="text-red-500">Tournament</span>
-            </h1>
-            <p className="text-gray-400 mt-2">{getPageTitle()}</p>
+            <img src="/favicon.svg" alt="Bame Logo" className="h-16 w-16 mx-auto"/>
+            <h1 className="text-5xl font-display text-white mt-4">BAME</h1>
+            <p className="text-light-2 mt-2 font-sans">{getPageTitle()}</p>
         </div>
         
-        <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-2xl p-8">
-            {error && <p className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md mb-4 text-center text-sm">{error}</p>}
-            {message && <p className="bg-green-900/50 border border-green-700 text-green-300 p-3 rounded-md mb-4 text-center text-sm">{message}</p>}
+        <div className="bg-dark-2 border border-white/10 rounded-xl shadow-2xl p-8">
+            {error && <p className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-md mb-4 text-center text-sm font-sans">{error}</p>}
+            {message && <p className="bg-green-900/50 border border-green-700 text-green-300 p-3 rounded-md mb-4 text-center text-sm font-sans">{message}</p>}
             
             {authMode === 'updatePassword' ? (
                  <form onSubmit={handleUpdatePassword} className="space-y-6">
-                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your new password" />
-                    <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
+                    <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" placeholder="Enter your new password" />
+                    <button type="submit" disabled={loading} className="w-full btn btn-primary">
                         {loading ? 'Saving...' : 'Save New Password'}
                     </button>
                  </form>
             ) : authMode === 'recover' ? (
                  <form onSubmit={handlePasswordRecovery} className="space-y-6">
-                    <input id="email-recover" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your email address" />
-                    <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
+                    <input id="email-recover" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" placeholder="Enter your email address" />
+                    <button type="submit" disabled={loading} className="w-full btn btn-primary">
                         {loading ? 'Sending...' : 'Send Recovery Link'}
                     </button>
                  </form>
@@ -164,35 +153,35 @@ const Auth: React.FC = () => {
                 <>
                     <form onSubmit={authMode === 'signIn' ? handleSignIn : handleSignUp} className="space-y-6">
                         {authMode === 'signUp' && (
-                            <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Your Name" />
+                            <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="input-field" placeholder="Your Name" />
                         )}
-                        <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Email address" />
-                        <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Password (at least 6 characters)" />
+                        <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" placeholder="Email address" />
+                        <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" placeholder="Password (at least 6 characters)" />
                         
                         {authMode === 'signIn' && (
-                           <div className="text-right -mt-2">
-                               <button type="button" onClick={() => handleSwitchMode('recover')} className="text-sm font-medium text-red-500 hover:text-red-400">
+                           <div className="text-right -mt-4">
+                               <button type="button" onClick={() => handleSwitchMode('recover')} className="text-sm font-medium text-brand-green hover:underline font-sans">
                                    Forgot password?
                                </button>
                            </div>
                         )}
                         
-                        <button type="submit" disabled={loading} className="w-full bg-red-600 text-white font-bold py-3 rounded-lg transition-colors hover:bg-red-700 disabled:bg-gray-500">
+                        <button type="submit" disabled={loading} className="w-full btn btn-primary">
                             {loading ? 'Processing...' : (authMode === 'signUp' ? 'Create Account' : 'Sign In')}
                         </button>
                     </form>
 
                     <div className="relative flex py-4 items-center">
-                        <div className="flex-grow border-t border-gray-600"></div>
-                        <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase">Or continue with</span>
-                        <div className="flex-grow border-t border-gray-600"></div>
+                        <div className="flex-grow border-t border-white/20"></div>
+                        <span className="flex-shrink mx-4 text-light-2 text-xs uppercase font-sans">Or</span>
+                        <div className="flex-grow border-t border-white/20"></div>
                     </div>
 
                     <button 
                         type="button" 
                         onClick={handleSignInWithGoogle}
                         disabled={loading}
-                        className="w-full flex items-center justify-center bg-white text-gray-700 font-bold py-3 rounded-lg transition-colors hover:bg-gray-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center bg-light-1 text-dark-1 font-bold py-3 rounded-lg transition-colors hover:bg-gray-200 disabled:bg-gray-400 btn"
                     >
                         <GoogleIcon className="w-5 h-5 mr-3" />
                         Sign in with Google
@@ -201,9 +190,9 @@ const Auth: React.FC = () => {
             )}
             
              {authMode !== 'updatePassword' && (
-                <p className="mt-6 text-center text-sm text-gray-400">
+                <p className="mt-6 text-center text-sm text-light-2 font-sans">
                     {authMode === 'recover' ? 'Remembered your password?' : authMode === 'signUp' ? 'Already have an account?' : "Don't have an account?"}
-                    <button onClick={() => handleSwitchMode(authMode === 'signIn' || authMode === 'recover' ? 'signUp' : 'signIn')} className="font-medium text-red-500 hover:text-red-400 ml-1">
+                    <button onClick={() => handleSwitchMode(authMode === 'signIn' || authMode === 'recover' ? 'signUp' : 'signIn')} className="font-medium text-brand-green hover:underline ml-1">
                         {authMode === 'signIn' || authMode === 'recover' ? 'Sign Up' : 'Sign In'}
                     </button>
                 </p>

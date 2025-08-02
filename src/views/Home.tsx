@@ -1,56 +1,79 @@
 import React, { useContext } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
-import NoticeBanner from '../components/NoticeBanner';
-import { TrophyIcon } from '../components/Icons';
+import { ArrowRightIcon, PlusIcon } from '../components/Icons';
+import { MOCK_GAMES } from '../constants';
 
 const Home: React.FC = () => {
   const { navigate } = useContext(AppContext) as AppContextType;
 
   return (
-    <div className="space-y-8">
-      <NoticeBanner />
-      
-      <div className="text-center">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-white">
-          Welcome to <span className="text-red-500">NKG Tournament BD</span>
+    <div className="space-y-20 md:space-y-32">
+      {/* Hero Section */}
+      <div className="text-center relative pt-10">
+        <p className="text-brand-green font-display tracking-widest mb-4"># World Class eSports & Gaming Site</p>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-display leading-tight">
+          SHAPING THE FUTURE OF <br/>
+          <span className="text-brand-green">ESPORTS</span>
         </h1>
-        <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-          The ultimate destination for competitive gamers in Bangladesh. Join tournaments, climb the leaderboard, and prove you're the best.
-        </p>
-      </div>
-
-      <div className="flex justify-center">
-        <button
-          onClick={() => navigate('tournaments')}
-          className="bg-red-600 text-white font-bold py-4 px-10 rounded-lg text-xl flex items-center space-x-3 transition-transform duration-300 hover:scale-105 hover:bg-red-700 shadow-lg shadow-red-500/30"
-        >
-          <TrophyIcon className="h-7 w-7" />
-          <span>Join a Tournament</span>
-        </button>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-8 pt-8">
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <h2 className="text-2xl font-bold text-red-500 mb-3">How It Works</h2>
-            <ol className="list-decimal list-inside space-y-2 text-gray-300">
-                <li>Browse upcoming tournaments.</li>
-                <li>Click "Join Now" and fill out your details.</li>
-                <li>Pay the entry fee via bKash.</li>
-                <li>Upload your payment screenshot.</li>
-                <li>Wait for admin approval and get ready to play!</li>
-            </ol>
+        <div className="mt-8 flex justify-center gap-4">
+          <button onClick={() => navigate('tournaments')} className="btn btn-primary">
+            Explore More <ArrowRightIcon className="w-4 h-4"/>
+          </button>
+          <button onClick={() => navigate('tournaments')} className="btn btn-secondary">
+            Browse Games <ArrowRightIcon className="w-4 h-4"/>
+          </button>
         </div>
-         <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-            <h2 className="text-2xl font-bold text-red-500 mb-3">Need Help?</h2>
-            <p className="text-gray-300 mb-4">
-              Have questions about rules, payments, or anything else? Our AI Assistant and support team are here for you.
-            </p>
-            <div className="flex space-x-4">
-                <p className="flex-1 text-center py-3 px-4 bg-gray-700 rounded-lg">Use the <span className="font-bold">AI Chat</span> for quick answers.</p>
-                <p className="flex-1 text-center py-3 px-4 bg-gray-700 rounded-lg">Contact <span className="font-bold">WhatsApp Support</span> for direct help.</p>
+      </div>
+
+      {/* Features Banner */}
+      <div className="bg-dark-2 py-6 border-y-2 border-brand-green">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap justify-around items-center gap-4 text-white font-display text-lg tracking-wider">
+            <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>GAMING SPANING</span></div>
+            <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>ACTION - PACKED</span></div>
+            <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>MIND - BENDING</span></div>
+            <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>COLLECTION OG GAMES</span></div>
+          </div>
+        </div>
+      </div>
+      
+      {/* About Section */}
+      <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <img src="https://placehold.co/600x600/121415/96F01D?text=Bame" alt="Forging Legends" className="rounded-2xl" />
+        </div>
+        <div className="space-y-6">
+          <p className="text-brand-green font-display tracking-widest"># About Our Gaming Site</p>
+          <h2 className="text-4xl md:text-5xl">Forging Legends In The Gaming Universe</h2>
+          <div className="space-y-4 font-sans text-light-2">
+            <p>We are dedicated to creating a vibrant and competitive ecosystem for gamers of all levels. From grassroots tournaments to professional leagues, we provide the platform for players to showcase their skills, connect with the community, and forge their own legacy.</p>
+            <p>Our state-of-the-art platform ensures fair play, seamless organization, and an electrifying experience for both participants and spectators.</p>
+          </div>
+          <button onClick={() => navigate('tournaments')} className="btn btn-primary mt-4">
+            Join Tournament <ArrowRightIcon className="w-4 h-4"/>
+          </button>
+        </div>
+      </div>
+
+      {/* Games Section */}
+      <div>
+        <div className="text-center mb-12">
+            <p className="text-brand-green font-display tracking-widest"># Releases The Latest Game</p>
+            <h2 className="text-4xl md:text-5xl">Game On, Power Up, Win Big!</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {MOCK_GAMES.map(game => (
+            <div key={game.id} className="group rounded-2xl overflow-hidden border border-white/10 transition-all duration-300 hover:border-brand-green hover:-translate-y-2">
+              <img src={game.imageUrl} alt={game.title} className="w-full h-auto object-cover" />
+              <div className="p-4 bg-dark-2">
+                <h4 className="text-xl text-white group-hover:text-brand-green transition-colors">{game.title}</h4>
+                <p className="font-sans text-sm text-light-2">Entry Fee: <span className="text-white font-semibold">{game.entryFee}</span></p>
+              </div>
             </div>
+          ))}
         </div>
       </div>
+
     </div>
   );
 };

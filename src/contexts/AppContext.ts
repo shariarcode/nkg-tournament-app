@@ -9,8 +9,6 @@ export interface AppContextType {
   setPlayer: React.Dispatch<React.SetStateAction<Player>>;
   isAnonymous: boolean;
   isAdmin: boolean;
-  notice: string;
-  setNotice: React.Dispatch<React.SetStateAction<string>>;
   isAdminView: boolean;
   navigate: (view: View) => void;
   navigateToTournamentDetails: (tournament: Tournament) => void;

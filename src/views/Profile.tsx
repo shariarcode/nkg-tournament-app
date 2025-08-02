@@ -77,17 +77,17 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-8">
+    <div className="max-w-4xl mx-auto space-y-12">
+      <div className="bg-dark-2 border border-white/10 rounded-xl shadow-lg p-8">
         <div className="flex flex-col md:flex-row items-center md:space-x-8">
           <div className="relative mb-6 md:mb-0">
-            <img src={player.profilePicUrl} alt="Profile" className="w-32 h-32 rounded-full ring-4 ring-red-500 object-cover" />
+            <img src={player.profilePicUrl} alt="Profile" className="w-32 h-32 rounded-full ring-4 ring-brand-green object-cover" />
              {isUploading && <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>}
             {!player.isAnonymous && (
               <button 
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="absolute bottom-1 right-1 bg-gray-700 p-2 rounded-full text-white hover:bg-gray-600 transition disabled:opacity-50"
+                className="absolute bottom-1 right-1 bg-dark-3 p-2 rounded-full text-white hover:bg-white/20 transition disabled:opacity-50"
                 aria-label="Change profile picture"
               >
                 <PencilIcon className="w-5 h-5"/>
@@ -95,25 +95,25 @@ const Profile: React.FC = () => {
             )}
             <input type="file" ref={fileInputRef} onChange={handleProfilePicChange} accept="image/*" className="hidden"/>
           </div>
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full text-center md:text-left">
             {isEditing ? (
               <form onSubmit={handleSave} className="space-y-4">
-                <input type="text" value={name} onChange={e => setName(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Player Name" />
-                <input type="text" value={freeFireId} onChange={e => setFreeFireId(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Free Fire ID" />
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Phone Number" />
-                <div className="flex space-x-4">
-                  <button type="submit" className="flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700 transition">Save Changes</button>
-                  <button type="button" onClick={() => setIsEditing(false)} className="flex-1 bg-gray-600 text-white font-bold py-2 rounded-lg hover:bg-gray-500 transition">Cancel</button>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} className="input-field" placeholder="Player Name" />
+                <input type="text" value={freeFireId} onChange={e => setFreeFireId(e.target.value)} className="input-field" placeholder="Free Fire ID" />
+                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="input-field" placeholder="Phone Number" />
+                <div className="flex space-x-4 pt-2">
+                  <button type="submit" className="flex-1 btn btn-primary">Save Changes</button>
+                  <button type="button" onClick={() => setIsEditing(false)} className="flex-1 btn bg-dark-3 text-light-1 hover:bg-white/10">Cancel</button>
                 </div>
               </form>
             ) : (
-              <div className="space-y-3">
-                <h1 className="text-3xl font-bold text-white">{player.name}</h1>
-                <p className="text-gray-400"><strong>Email:</strong> {player.email || 'N/A'}</p>
-                <p className="text-gray-400"><strong>Free Fire ID:</strong> {player.freeFireId}</p>
-                <p className="text-gray-400"><strong>Phone:</strong> {player.phone}</p>
+              <div className="space-y-3 font-sans">
+                <h1 className="text-4xl font-display text-white">{player.name}</h1>
+                <p className="text-light-2"><strong>Email:</strong> {player.email || 'N/A'}</p>
+                <p className="text-light-2"><strong>Free Fire ID:</strong> {player.freeFireId}</p>
+                <p className="text-light-2"><strong>Phone:</strong> {player.phone}</p>
                 {!player.isAnonymous && (
-                    <button onClick={() => setIsEditing(true)} className="mt-4 bg-red-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-700 transition">Edit Profile</button>
+                    <button onClick={() => setIsEditing(true)} className="mt-4 btn btn-primary">Edit Profile</button>
                 )}
               </div>
             )}
@@ -121,27 +121,27 @@ const Profile: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-xl shadow-lg p-6">
+      <div className="bg-dark-2 border border-white/10 rounded-xl shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-4 text-white">My Tournament Registrations</h2>
         {registrations.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="border-b border-gray-600 text-sm text-gray-400">
+            <table className="w-full text-left font-sans">
+              <thead className="border-b-2 border-white/10 text-sm text-light-2 uppercase">
                 <tr>
-                  <th className="p-2">Tournament</th>
-                  <th className="p-2">bKash No.</th>
-                  <th className="p-2">Status</th>
+                  <th className="p-3">Tournament</th>
+                  <th className="p-3">bKash No.</th>
+                  <th className="p-3 text-center">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {registrations.map(reg => (
-                  <tr key={reg.id} className="border-b border-gray-700 last:border-0">
-                    <td className="p-3">{reg.tournamentName}</td>
-                    <td className="p-3">{reg.bkash_number}</td>
-                    <td className="p-3">
+                  <tr key={reg.id} className="border-b border-white/10 last:border-0 hover:bg-dark-3/50">
+                    <td className="p-3 text-light-1">{reg.tournamentName}</td>
+                    <td className="p-3 text-light-2">{reg.bkash_number}</td>
+                    <td className="p-3 text-center">
                       <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                        reg.status === 'Pending' ? 'bg-yellow-500 text-black' :
-                        reg.status === 'Approved' ? 'bg-green-500 text-white' :
+                        reg.status === 'Pending' ? 'bg-brand-yellow text-dark-1' :
+                        reg.status === 'Approved' ? 'bg-brand-green text-dark-1' :
                         'bg-red-800 text-white'
                       }`}>
                         {reg.status}
@@ -153,7 +153,7 @@ const Profile: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-gray-400 text-center py-4">You haven't joined any tournaments yet. Go to the Tournaments page to join one!</p>
+          <p className="text-light-2 text-center py-4 font-sans">You haven't joined any tournaments yet. Go to the Tournaments page to join one!</p>
         )}
       </div>
     </div>

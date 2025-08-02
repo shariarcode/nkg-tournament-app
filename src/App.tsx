@@ -1,7 +1,3 @@
-
-
-
-
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
 import { Player, Tournament, Registration, LeaderboardEntry } from './types';
@@ -16,7 +12,6 @@ import Profile from './views/Profile';
 import Leaderboard from './views/Leaderboard';
 import AdminDashboard from './views/AdminDashboard';
 import AIChat from './components/AIChat';
-import WhatsAppButton from './components/WhatsAppButton';
 import Auth from './views/Auth';
 import TournamentDetails from './views/TournamentDetails';
 
@@ -25,7 +20,6 @@ export default function App() {
   const [player, setPlayer] = useState<Player>(ANONYMOUS_PLAYER);
   const [currentView, setCurrentView] = useState<View>('home');
   const [isAdminView, setIsAdminView] = useState(false);
-  const [notice, setNotice] = useState('🏆 Grand Opening Tournament! Join now for a chance to win 10,000 BDT! 🏆');
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -144,8 +138,6 @@ export default function App() {
     setPlayer,
     isAnonymous: !!player.isAnonymous,
     isAdmin: !!player.isAdmin,
-    notice,
-    setNotice,
     isAdminView,
     navigate,
     navigateToTournamentDetails,
@@ -157,11 +149,11 @@ export default function App() {
     setRegistrations,
     signOut: handleSignOut,
     session,
-  }), [player, notice, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session]);
+  }), [player, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session]);
   
   const renderView = () => {
     if (loading) {
-       return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-500"></div></div>;
+       return <div className="flex justify-center items-center h-screen"><div className="animate-spin rounded-full h-16 w-16 border-b-2 border-brand-green"></div></div>;
     }
     if (isAdminView && player.isAdmin) return <AdminDashboard />;
     switch (currentView) {
@@ -186,13 +178,12 @@ export default function App() {
 
   return (
     <AppContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-gray-900 text-white font-sans">
+      <div className="min-h-screen bg-dark-1 text-light-1 font-sans">
         <Header currentView={currentView} onNavigate={navigate} isAdminView={isAdminView} onSetIsAdminView={setIsAdminView} isUserAdmin={!!player.isAdmin} />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 md:py-16">
           {renderView()}
         </main>
         <AIChat />
-        <WhatsAppButton />
       </div>
     </AppContext.Provider>
   );

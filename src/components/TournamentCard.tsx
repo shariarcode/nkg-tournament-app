@@ -1,83 +1,78 @@
 import React from 'react';
-import { Tournament, RegistrationStatus } from '../types';
-import { TrophyIcon } from './Icons';
+import { Tournament } from '../types';
+import { YoutubeIcon, TwitchIcon } from './Icons';
 
 interface TournamentCardProps {
   tournament: Tournament;
-  onJoin: (tournament: Tournament) => void;
-  onViewDetails: (tournament: Tournament) => void;
-  registrationStatus: RegistrationStatus | null;
+  onClick: (tournament: Tournament) => void;
 }
 
-const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onJoin, onViewDetails, registrationStatus }) => {
-  const isFinished = tournament.status === 'Finished';
-
-  const getButtonState = () => {
-    if (isFinished) {
-      return { text: 'Finished', disabled: true, className: 'bg-gray-600 cursor-not-allowed hover:bg-gray-600' };
-    }
-    if (registrationStatus === 'Approved') {
-      return { text: 'View Details', disabled: false, className: 'bg-green-600 text-white hover:bg-green-700' };
-    }
-    if (registrationStatus === 'Pending') {
-      return { text: 'Pending', disabled: true, className: 'bg-yellow-500 text-black cursor-not-allowed hover:bg-yellow-500' };
-    }
-    if (registrationStatus === 'Rejected') {
-      return { text: 'Rejected', disabled: true, className: 'bg-red-800 text-white cursor-not-allowed hover:bg-red-800' };
-    }
-    return { text: 'Join Now', disabled: false, className: 'bg-red-600 text-white hover:bg-red-700' };
-  };
-
-  const { text, disabled, className } = getButtonState();
-
-  const handleClick = () => {
-    if(disabled) return;
-
-    if (registrationStatus === 'Approved') {
-        onViewDetails(tournament);
-    } else {
-        onJoin(tournament);
-    }
-  }
-
-  return (
-    <div className={`bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-red-500/20 hover:scale-[1.02] border border-gray-700 ${isFinished ? 'opacity-60' : ''}`}>
-      <div className="bg-gradient-to-r from-gray-700 to-gray-800 p-4">
-        <h3 className="text-xl font-bold text-white truncate">{tournament.name}</h3>
-        <p className="text-sm text-gray-400">{tournament.date} at {tournament.time}</p>
-      </div>
-      <div className="p-5 space-y-4">
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-medium">Entry Fee:</span>
-          <span className="text-red-500 font-bold text-lg">{tournament.entry_fee} BDT</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-medium">Prize Pool:</span>
-          <span className="text-green-500 font-bold text-lg">{tournament.prize_pool} BDT</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-gray-400 font-medium">Status:</span>
-          <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-            tournament.status === 'Upcoming' ? 'bg-blue-600 text-white' : 
-            tournament.status === 'Ongoing' ? 'bg-yellow-500 text-black' : 
-            'bg-gray-600 text-gray-200'
-          }`}>
-            {tournament.status}
-          </span>
-        </div>
-      </div>
-      <div className="p-4 bg-gray-800/50">
-        <button
-          onClick={handleClick}
-          disabled={disabled}
-          className={`w-full font-bold py-3 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 ${className}`}
-        >
-          <TrophyIcon className="h-5 w-5" />
-          <span>{text}</span>
-        </button>
-      </div>
+const PlayerLogo: React.FC = () => (
+    <div className="w-20 h-20 bg-dark-3 rounded-md flex items-center justify-center ring-1 ring-white/10">
+        <img src="/favicon.svg" alt="Player Logo" className="w-12 h-12 opacity-50" />
     </div>
-  );
+);
+
+const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onClick }) => {
+    const isFinished = tournament.status === 'Finished';
+    const isUpcoming = tournament.status === 'Upcoming';
+    const isOngoing = tournament.status === 'Ongoing';
+    
+    const getStatusChip = () => {
+        let text = tournament.status;
+        let className = 'bg-gray-500 text-white';
+
+        if (isUpcoming) {
+            text = 'Upcoming';
+            className = 'bg-brand-green text-dark-1';
+        } else if (isOngoing) {
+            text = 'Live';
+            className = 'bg-red-600 text-white animate-pulse';
+        } else if (isFinished) {
+            text = 'Finished';
+            className = 'bg-dark-3 text-light-2';
+        }
+
+        return <div className={`absolute top-4 right-4 text-xs font-display uppercase px-3 py-1 rounded-full ${className}`} style={{clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)'}}>{text}</div>;
+    }
+
+    return (
+        <div 
+            className="card-border group cursor-pointer"
+            onClick={() => onClick(tournament)}
+        >
+            <div className={`card-border-content p-6 flex items-center gap-6 transition-all duration-300 hover:bg-dark-3/50 relative ${isFinished ? 'opacity-70' : ''}`}>
+                
+                <div className="flex items-center gap-4">
+                    <PlayerLogo />
+                    <span className="font-display text-3xl text-light-2">VS</span>
+                    <PlayerLogo />
+                </div>
+
+                <div className="flex-1">
+                    {getStatusChip()}
+                    <h3 className="text-xl text-white group-hover:text-brand-green transition-colors mb-2 mt-4">{tournament.name}</h3>
+                    <p className="text-sm font-sans text-light-2 mb-3">{tournament.date} @ {tournament.time}</p>
+                    <div className="flex items-center gap-4">
+                        <a href="#" onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 text-light-2 hover:text-white transition-colors text-sm">
+                            <YoutubeIcon className="w-5 h-5 text-red-600" />
+                            <span>Youtube</span>
+                        </a>
+                        <a href="#" onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 text-light-2 hover:text-white transition-colors text-sm">
+                            <TwitchIcon className="w-5 h-5 text-purple-500" />
+                            <span>Twitch</span>
+                        </a>
+                    </div>
+                </div>
+
+                {!isFinished && 
+                    <div className="absolute bottom-4 right-4 bg-dark-1 px-3 py-1 rounded-md border border-white/10">
+                        <p className="text-xs font-sans text-light-2">Prize: <span className="font-bold text-brand-yellow">{tournament.prize_pool.toLocaleString()} BDT</span></p>
+                    </div>
+                }
+            </div>
+        </div>
+    );
 };
 
 export default TournamentCard;

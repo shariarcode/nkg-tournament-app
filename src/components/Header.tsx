@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, AppContext, AppContextType } from '../contexts/AppContext';
-import { UserIcon, TrophyIcon, HomeIcon, ChartBarIcon, WrenchScrewdriverIcon, ArrowRightOnRectangleIcon } from './Icons';
+import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, UserIcon } from './Icons';
 
 interface HeaderProps {
   currentView: View;
@@ -12,84 +12,83 @@ interface HeaderProps {
 
 const NavItem: React.FC<{
   label: string;
-  icon: React.ReactNode;
   isActive: boolean;
   onClick: () => void;
-}> = ({ label, icon, isActive, onClick }) => (
+  hasDropdown?: boolean;
+}> = ({ label, isActive, onClick, hasDropdown }) => (
   <button
     onClick={onClick}
-    className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+    className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors duration-200 uppercase font-display tracking-widest ${
       isActive
-        ? 'bg-red-600 text-white'
-        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+        ? 'text-brand-green'
+        : 'text-light-2 hover:text-light-1'
     }`}
   >
-    {icon}
     <span>{label}</span>
+    {hasDropdown && <ChevronDownIcon className="h-3 w-3" />}
   </button>
 );
 
-const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isAdminView, onSetIsAdminView, isUserAdmin }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, isAdminView, onSetIsAdminView }) => {
   const { player, signOut } = useContext(AppContext) as AppContextType;
 
   return (
-    <header className="bg-gray-800 shadow-lg sticky top-0 z-40">
+    <header className="bg-dark-1/80 backdrop-blur-sm sticky top-0 z-40 border-b border-white/10">
+      {/* Top Bar */}
+      <div className="hidden md:block border-b border-white/10">
+        <div className="container mx-auto px-4 h-10 flex justify-between items-center text-xs text-light-2">
+            <div>
+              <span>Welcome to our Bame Esports team</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <a href="#" className="hover:text-white transition-colors"><FacebookIcon className="w-4 h-4"/></a>
+              <a href="#" className="hover:text-white transition-colors"><TwitterIcon className="w-4 h-4"/></a>
+              <a href="#" className="hover:text-white transition-colors"><InstagramIcon className="w-4 h-4"/></a>
+            </div>
+        </div>
+      </div>
+
+      {/* Main Header */}
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2">
-            <TrophyIcon className="h-8 w-8 text-red-500" />
-            <span className="text-xl font-bold text-white tracking-wider">NKG <span className="text-red-500">Tournament</span></span>
+        <div className="flex items-center justify-between h-20">
+          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => onNavigate('home')}>
+             <img src="/favicon.svg" alt="Bame Logo" className="h-10 w-10"/>
+             <span className="text-3xl font-display text-white">Bame</span>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-2">
-            {!isAdminView && (
-              <>
-                <NavItem label="Home" icon={<HomeIcon className="h-5 w-5" />} isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
-                <NavItem label="Tournaments" icon={<TrophyIcon className="h-5 w-5" />} isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
-                <NavItem label="Leaderboard" icon={<ChartBarIcon className="h-5 w-5" />} isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
-                <NavItem label="Profile" icon={<UserIcon className="h-5 w-5" />} isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
-              </>
-            )}
-             {isAdminView && (
-               <div className="flex items-center space-x-2 text-yellow-400">
-                  <WrenchScrewdriverIcon className="h-5 w-5" />
-                  <span className="font-semibold">Admin Panel</span>
-                </div>
-            )}
+          <nav className="hidden lg:flex items-center space-x-2">
+            <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
+            <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+            <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
+            <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </nav>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-               <img src={player.profilePicUrl} alt="Player" className="h-8 w-8 rounded-full border-2 border-red-500 object-cover"/>
-               <span className="hidden sm:inline text-sm font-medium text-gray-300">{player.name}</span>
-            </div>
-            {isUserAdmin && (
-              <label htmlFor="admin-toggle" className="flex items-center cursor-pointer">
-                <div className="relative">
-                  <input type="checkbox" id="admin-toggle" className="sr-only" checked={isAdminView} onChange={(e) => onSetIsAdminView(e.target.checked)} />
-                  <div className={`block w-14 h-8 rounded-full transition ${isAdminView ? 'bg-red-600' : 'bg-gray-600'}`}></div>
-                  <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition transform ${isAdminView ? 'translate-x-6' : ''}`}></div>
-                </div>
-                <div className="ml-3 text-gray-300 text-sm font-medium hidden lg:block">Admin</div>
-              </label>
-            )}
-             <button onClick={signOut} className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 text-gray-400 hover:bg-gray-700 hover:text-white" aria-label="Sign Out">
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
-            </button>
+              <button className="text-light-2 hover:text-white"><SearchIcon className="h-5 w-5"/></button>
+              <div className="w-px h-6 bg-white/20"></div>
+              <div className="flex items-center space-x-2">
+                 <img src={player.profilePicUrl} alt="Player" className="h-9 w-9 rounded-full border-2 border-brand-green object-cover"/>
+                 <span className="hidden sm:inline text-sm font-medium text-light-1">{player.name}</span>
+              </div>
+              <button className="btn btn-primary !px-5 !py-2.5">Live Streaming</button>
+              <button onClick={signOut} className="text-light-2 hover:text-white" aria-label="Sign Out">
+                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                  </svg>
+              </button>
           </div>
         </div>
       </div>
+
       {/* Mobile Navigation */}
-      {!isAdminView && (
-        <div className="md:hidden bg-gray-800 border-t border-gray-700">
+      <div className="lg:hidden bg-dark-2 border-t border-white/10">
           <div className="flex justify-around py-2">
-            <NavItem label="Home" icon={<HomeIcon className="h-6 w-6" />} isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
-            <NavItem label="Tournaments" icon={<TrophyIcon className="h-6 w-6" />} isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
-            <NavItem label="Leaderboard" icon={<ChartBarIcon className="h-6 w-6" />} isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
-            <NavItem label="Profile" icon={<UserIcon className="h-6 w-6" />} isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
+            <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
+            <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+            <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
+            <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </div>
-        </div>
-      )}
+      </div>
     </header>
   );
 };
