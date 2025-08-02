@@ -1,4 +1,5 @@
 
+
 import React, { useState, useContext, useRef } from 'react';
 import { Tournament, Registration, DbRegistration } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
@@ -72,10 +73,10 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
         status: 'Pending',
       };
 
-      const { data: regData, error: insertError } = await (supabase
-        .from('registrations') as any)
+      const { data: regData, error: insertError } = await supabase
+        .from('registrations')
         .insert(newRegistration)
-        .select('*, tournaments(name)')
+        .select()
         .single();
       
       if (insertError) throw insertError;
@@ -83,7 +84,7 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
       if (regData) {
         const newRegWithTournamentName: Registration = { 
             ...(regData as DbRegistration), 
-            tournamentName: (regData as any).tournaments?.name || 'N/A' 
+            tournamentName: tournament.name 
         };
         setRegistrations(prev => [...prev, newRegWithTournamentName]);
       }

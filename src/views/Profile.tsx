@@ -1,4 +1,5 @@
 
+
 import React, { useState, useContext, useRef } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { PencilIcon } from '../components/Icons';
@@ -22,8 +23,8 @@ const Profile: React.FC = () => {
 
     const updates: ProfileUpdate = { name, free_fire_id: freeFireId, phone };
 
-    const { error } = await (supabase
-      .from('profiles') as any)
+    const { error } = await supabase
+      .from('profiles')
       .update(updates)
       .eq('id', player.id);
 
@@ -60,8 +61,8 @@ const Profile: React.FC = () => {
         const newPicUrl = `${urlData.publicUrl}?t=${new Date().getTime()}`;
 
         const picUpdate: ProfileUpdate = { profile_pic_url: newPicUrl };
-        const { error: updateError } = await (supabase
-            .from('profiles') as any)
+        const { error: updateError } = await supabase
+            .from('profiles')
             .update(picUpdate)
             .eq('id', player.id);
 

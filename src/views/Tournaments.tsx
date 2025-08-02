@@ -1,3 +1,4 @@
+
 import React, { useState, useContext } from 'react';
 import { Tournament } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
@@ -18,7 +19,7 @@ const AngledTab: React.FC<{ label: string; isActive: boolean; onClick: () => voi
 }
 
 const Tournaments: React.FC = () => {
-  const { tournaments, navigateToTournamentDetails } = useContext(AppContext) as AppContextType;
+  const { tournaments, navigateToTournamentDetails, siteContent } = useContext(AppContext) as AppContextType;
   const [filter, setFilter] = useState<FilterStatus>('All');
 
   const handleCardClick = (tournament: Tournament) => {
@@ -36,8 +37,8 @@ const Tournaments: React.FC = () => {
     <>
       <div className="space-y-12">
         <div className="text-center">
-            <p className="text-brand-green font-display tracking-widest"># Game Streaming Battle</p>
-            <h1 className="text-4xl md:text-5xl font-bold text-white">Our Gaming Tournaments!</h1>
+            <p className="text-brand-green font-display tracking-widest">{siteContent['tournaments_page_subtitle'] || '# Game Streaming Battle'}</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-white">{siteContent['tournaments_page_title'] || 'Our Gaming Tournaments!'}</h1>
         </div>
         
         <div className="flex justify-center items-center bg-dark-2 p-1 rounded-lg max-w-max mx-auto">

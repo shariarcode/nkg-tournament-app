@@ -46,17 +46,17 @@ export default function App() {
 
         const { data: tourneyData, error: tourneyError } = tourneyResult;
         if (tourneyError) throw tourneyError;
-        setTournaments(((tourneyData as any) as Tournament[]) || []);
+        setTournaments((tourneyData as Tournament[]) || []);
 
         const { data: leaderboardData, error: leaderboardError } = leaderboardResult;
         if (leaderboardError) throw leaderboardError;
-        setLeaderboard(((leaderboardData as any) as LeaderboardEntry[]) || []);
+        setLeaderboard((leaderboardData as LeaderboardEntry[]) || []);
         
         const { data: contentData, error: contentError } = contentResult;
         if (contentError) {
           console.error("Error fetching site content:", contentError);
         } else if (contentData) {
-          const contentMap = ((contentData as any) as SiteContentEntry[]).reduce((acc, item) => {
+          const contentMap = (contentData as SiteContentEntry[]).reduce((acc, item) => {
             acc[item.key] = item.value;
             return acc;
           }, {} as SiteContent);
@@ -98,7 +98,7 @@ export default function App() {
           console.error('Error fetching user profile:', error);
           await handleSignOut();
         } else if (profile) {
-          const typedProfile = profile as any as SupabaseProfile;
+          const typedProfile = profile as SupabaseProfile;
           const fetchedPlayer: Player = {
             id: typedProfile.id,
             name: typedProfile.name || 'New Player',
@@ -120,7 +120,7 @@ export default function App() {
           if (regError) {
             console.error("Error fetching registrations", regError);
           } else if (regData) {
-            const formattedRegs: Registration[] = (regData as DbRegistration[]).map(reg => ({
+            const formattedRegs: Registration[] = (regData || []).map(reg => ({
                 ...reg,
                 tournamentName: tournaments.find(t => t.id === reg.tournament_id)?.name || 'N/A'
             }));

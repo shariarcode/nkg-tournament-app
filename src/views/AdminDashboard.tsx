@@ -1,7 +1,5 @@
 
 
-
-
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent } from '../types';
@@ -16,8 +14,9 @@ type LeaderboardInsert = Database['public']['Tables']['leaderboard']['Insert'];
 type SiteContentInsert = Database['public']['Tables']['site_content']['Insert'];
 
 
-// Defines the structure of editable content for the Home Page
-const contentSchema: (Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { defaultValue: string })[] = [
+type ContentSchemaItem = Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { defaultValue: string };
+
+const homeContentSchema: ContentSchemaItem[] = [
     { key: 'home_hero_subtitle', type: 'text', defaultValue: '# World Class eSports & Gaming Site' },
     { key: 'home_hero_title', type: 'textarea', defaultValue: 'SHAPING THE FUTURE OF <br/><span class="text-brand-green">ESPORTS</span>' },
     { key: 'home_features_banner_item1', type: 'text', defaultValue: 'GAMING SPANING' },
@@ -32,6 +31,27 @@ const contentSchema: (Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { 
     { key: 'home_games_subtitle', type: 'text', defaultValue: '# Releases The Latest Game' },
     { key: 'home_games_title', type: 'text', defaultValue: 'Game On, Power Up, Win Big!' },
 ];
+
+const tournamentsContentSchema: ContentSchemaItem[] = [
+    { key: 'tournaments_page_subtitle', type: 'text', defaultValue: '# Game Streaming Battle' },
+    { key: 'tournaments_page_title', type: 'text', defaultValue: 'Our Gaming Tournaments!' },
+];
+
+const leaderboardContentSchema: ContentSchemaItem[] = [
+    { key: 'leaderboard_page_subtitle', type: 'text', defaultValue: '# Top World Class Gamer' },
+    { key: 'leaderboard_page_title', type: 'text', defaultValue: "Let's See Our Pro Players" },
+];
+
+
+const contentSchema = [...homeContentSchema, ...tournamentsContentSchema, ...leaderboardContentSchema];
+
+const contentSchemasByPage = {
+    'Home Page': homeContentSchema,
+    'Tournaments Page': tournamentsContentSchema,
+    'Leaderboard Page': leaderboardContentSchema,
+} as const;
+
+type ContentPageName = keyof typeof contentSchemasByPage;
 
 const TournamentModalForm: React.FC<{
     onClose: () => void;
@@ -135,6 +155,7 @@ const AdminDashboard: React.FC = () => {
   const [editableContent, setEditableContent] = useState<SiteContent>({});
   const [mergedContentSchema, setMergedContentSchema] = useState<(SiteContentEntry & { defaultValue: string })[]>([]);
   const [loadingContent, setLoadingContent] = useState(true);
+  const [activeContentTab, setActiveContentTab] = useState<ContentPageName>('Home Page');
 
   const fetchAdminData = async () => {
       setLoadingRegistrations(true);
@@ -180,7 +201,7 @@ const AdminDashboard: React.FC = () => {
         const { data, error } = await supabase.from('site_content').select('*');
         if (error) console.error("Error fetching site content for admin:", error);
 
-        const dbContentMap = ((data || []) as any as SiteContentEntry[]).reduce((acc, item) => {
+        const dbContentMap = (data || []).reduce((acc, item) => {
             acc[item.key] = item;
             return acc;
         }, {} as Record<string, SiteContentEntry>);
@@ -225,7 +246,7 @@ const AdminDashboard: React.FC = () => {
   
   const approveRegistration = async (registrationId: number) => {
     const update: RegistrationUpdate = { status: 'Approved' };
-    const { error } = await (supabase.from('registrations') as any).update(update).eq('id', registrationId);
+    const { error } = await supabase.from('registrations').update(update).eq('id', registrationId);
     if (error) alert(`Error approving registration: ${error.message}`);
     else {
       setAllRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status: 'Approved' } : r));
@@ -260,7 +281,7 @@ const AdminDashboard: React.FC = () => {
     if(deleteError) { alert("Error clearing leaderboard: " + deleteError.message); return; }
     
     const insertableData: LeaderboardInsert[] = ranked.map(({ id, ...rest }) => rest);
-    const { data: insertedData, error: insertError } = await (supabase.from('leaderboard') as any).insert(insertableData).select();
+    const { data: insertedData, error: insertError } = await supabase.from('leaderboard').insert(insertableData).select();
 
     if (insertError) alert("Error saving leaderboard: " + insertError.message);
     else {
@@ -271,11 +292,11 @@ const AdminDashboard: React.FC = () => {
   
   const handleSaveTournament = async (tournamentData: TournamentInsert | TournamentUpdate) => {
     if (editingTournament) { // Edit
-        const { data, error } = await (supabase.from('tournaments') as any).update(tournamentData).eq('id', editingTournament.id).select().single();
+        const { data, error } = await supabase.from('tournaments').update(tournamentData).eq('id', editingTournament.id).select().single();
         if (error) { alert(error.message); throw error; }
         else if (data) setTournaments(ts => ts.map(t => t.id === (data as Tournament).id ? (data as Tournament) : t));
     } else { // Add
-        const { data, error } = await (supabase.from('tournaments') as any).insert(tournamentData as TournamentInsert).select().single();
+        const { data, error } = await supabase.from('tournaments').insert(tournamentData as TournamentInsert).select().single();
         if (error) { alert(error.message); throw error; }
         else if (data) setTournaments(ts => [(data as Tournament), ...ts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     }
@@ -312,7 +333,7 @@ const AdminDashboard: React.FC = () => {
           return;
       }
 
-      const { error } = await (supabase.from('site_content') as any).upsert(updates, { onConflict: 'key' });
+      const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'key' });
 
       if (error) {
           alert("Error saving content: " + error.message);
@@ -335,12 +356,25 @@ const AdminDashboard: React.FC = () => {
       {/* Site Content Management */}
       <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
         <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-white">Manage Site Content (Home Page)</h2>
-             <button onClick={handleSaveContent} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80">Save Content</button>
+            <h2 className="text-2xl font-bold text-white">Manage Site Content</h2>
+             <button onClick={handleSaveContent} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80">Save All Content</button>
         </div>
+        
+        <div className="flex border-b border-white/20 mb-4 font-sans">
+            {(Object.keys(contentSchemasByPage) as ContentPageName[]).map(tabName => (
+                <button 
+                    key={tabName} 
+                    onClick={() => setActiveContentTab(tabName)}
+                    className={`px-4 py-2 text-sm font-medium transition-colors duration-200  ${activeContentTab === tabName ? 'border-b-2 border-brand-green text-brand-green' : 'text-light-2 hover:text-white'}`}
+                >
+                    {tabName}
+                </button>
+            ))}
+        </div>
+
         {loadingContent ? <p className="text-light-2">Loading content editor...</p> : (
             <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
-                {mergedContentSchema.map(entry => (
+                {contentSchemasByPage[activeContentTab].map(entry => (
                     <div key={entry.key} className={entry.type === 'textarea' ? 'md:col-span-2' : ''}>
                         <label className="text-sm font-sans text-light-2 capitalize">{entry.key.replace(/_/g, ' ')}</label>
                         {entry.type === 'textarea' ? (

@@ -1,8 +1,9 @@
+
 import React, { useContext } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 
 const Leaderboard: React.FC = () => {
-    const { leaderboard } = useContext(AppContext) as AppContextType;
+    const { leaderboard, siteContent } = useContext(AppContext) as AppContextType;
 
     const getBorderColor = (rank: number) => {
         if (rank === 1) return 'border-brand-yellow';
@@ -23,8 +24,8 @@ const Leaderboard: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto space-y-12">
             <div className="text-center">
-                <p className="text-brand-green font-display tracking-widest"># Top World Class Gamer</p>
-                <h1 className="text-4xl md:text-5xl font-bold text-white">Let's See Our Pro Players</h1>
+                <p className="text-brand-green font-display tracking-widest">{siteContent['leaderboard_page_subtitle'] || '# Top World Class Gamer'}</p>
+                <h1 className="text-4xl md:text-5xl font-bold text-white">{siteContent['leaderboard_page_title'] || "Let's See Our Pro Players"}</h1>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-8">
