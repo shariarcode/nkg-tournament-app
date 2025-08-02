@@ -47,3 +47,7 @@ export interface Game {
   imageUrl: string;
   entryFee: string;
 }
+
+// Types for sitewide editable content
+export type SiteContentEntry = Database['public']['Tables']['site_content']['Row'];
+export type SiteContent = Record<string, string>;

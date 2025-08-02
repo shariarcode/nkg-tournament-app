@@ -1,7 +1,8 @@
 
+
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
-import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile } from './types';
+import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile, SiteContent, SiteContentEntry } from './types';
 import { MOCK_TOURNAMENTS, MOCK_LEADERBOARD, ANONYMOUS_PLAYER } from './constants';
 import { supabase } from './services/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -26,19 +27,38 @@ export default function App() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [selectedTournamentForDetails, setSelectedTournamentForDetails] = useState<Tournament | null>(null);
   const [loading, setLoading] = useState(true);
+  const [siteContent, setSiteContent] = useState<SiteContent>({});
 
   useEffect(() => {
     // Fetch initial data
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const { data: tourneyData, error: tourneyError } = await supabase.from('tournaments').select('*').order('date', { ascending: false });
+        const tourneyPromise = supabase.from('tournaments').select('*').order('date', { ascending: false });
+        const leaderboardPromise = supabase.from('leaderboard').select('*').order('rank', { ascending: true });
+        const contentPromise = supabase.from('site_content').select('*');
+
+        const [tourneyResult, leaderboardResult, contentResult] = await Promise.all([tourneyPromise, leaderboardPromise, contentPromise]);
+
+        const { data: tourneyData, error: tourneyError } = tourneyResult;
         if (tourneyError) throw tourneyError;
         setTournaments((tourneyData as Tournament[]) || []);
 
-        const { data: leaderboardData, error: leaderboardError } = await supabase.from('leaderboard').select('*').order('rank', { ascending: true });
+        const { data: leaderboardData, error: leaderboardError } = leaderboardResult;
         if (leaderboardError) throw leaderboardError;
         setLeaderboard((leaderboardData as LeaderboardEntry[]) || []);
+        
+        const { data: contentData, error: contentError } = contentResult;
+        if (contentError) {
+          console.error("Error fetching site content:", contentError);
+        } else if (contentData) {
+          const contentMap = (contentData as SiteContentEntry[]).reduce((acc, item) => {
+            acc[item.key] = item.value;
+            return acc;
+          }, {} as SiteContent);
+          setSiteContent(contentMap);
+        }
+
       } catch (error) {
         console.error("Error fetching initial data:", error);
         // Set mock data as fallback
@@ -151,7 +171,9 @@ export default function App() {
     setRegistrations,
     signOut: handleSignOut,
     session,
-  }), [player, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session]);
+    siteContent,
+    setSiteContent,
+  }), [player, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session, siteContent]);
   
   const renderView = () => {
     if (loading) {

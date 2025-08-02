@@ -92,22 +92,31 @@ export interface Database {
           status?: string
           tournament_id?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "registrations_player_id_fkey"
-            columns: ["player_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "registrations_tournament_id_fkey"
-            columns: ["tournament_id"]
-            isOneToOne: false
-            referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          id: number
+          created_at: string
+          key: string
+          value: string
+          type: "text" | "textarea" | "image_url"
+        }
+        Insert: {
+          id?: number
+          created_at?: string
+          key: string
+          value: string
+          type: "text" | "textarea" | "image_url"
+        }
+        Update: {
+          id?: number
+          created_at?: string
+          key?: string
+          value?: string
+          type?: "text" | "textarea" | "image_url"
+        }
+        Relationships: []
       }
       tournaments: {
         Row: {

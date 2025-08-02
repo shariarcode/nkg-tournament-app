@@ -1,5 +1,5 @@
 import React, { createContext } from 'react';
-import { Player, Tournament, Registration, LeaderboardEntry } from '../types';
+import { Player, Tournament, Registration, LeaderboardEntry, SiteContent } from '../types';
 import { Session } from '@supabase/supabase-js';
 
 export type View = 'home' | 'tournaments' | 'profile' | 'leaderboard' | 'tournamentDetails';
@@ -20,6 +20,8 @@ export interface AppContextType {
   setRegistrations: React.Dispatch<React.SetStateAction<Registration[]>>;
   signOut: () => void;
   session: Session | null;
+  siteContent: SiteContent;
+  setSiteContent: React.Dispatch<React.SetStateAction<SiteContent>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

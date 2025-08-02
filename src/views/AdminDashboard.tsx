@@ -1,7 +1,8 @@
 
+
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
-import { Registration, Tournament, LeaderboardEntry } from '../types';
+import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent } from '../types';
 import { PencilIcon, XMarkIcon } from '../components/Icons';
 import { supabase } from '../services/supabase';
 import type { Database } from '../services/database.types';
@@ -10,7 +11,25 @@ type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
 type TournamentInsert = Database['public']['Tables']['tournaments']['Insert'];
 type RegistrationUpdate = Database['public']['Tables']['registrations']['Update'];
 type LeaderboardInsert = Database['public']['Tables']['leaderboard']['Insert'];
+type SiteContentInsert = Database['public']['Tables']['site_content']['Insert'];
 
+
+// Defines the structure of editable content for the Home Page
+const contentSchema: (Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { defaultValue: string })[] = [
+    { key: 'home_hero_subtitle', type: 'text', defaultValue: '# World Class eSports & Gaming Site' },
+    { key: 'home_hero_title', type: 'textarea', defaultValue: 'SHAPING THE FUTURE OF <br/><span class="text-brand-green">ESPORTS</span>' },
+    { key: 'home_features_banner_item1', type: 'text', defaultValue: 'GAMING SPANING' },
+    { key: 'home_features_banner_item2', type: 'text', defaultValue: 'ACTION - PACKED' },
+    { key: 'home_features_banner_item3', type: 'text', defaultValue: 'MIND - BENDING' },
+    { key: 'home_features_banner_item4', type: 'text', defaultValue: 'COLLECTION OG GAMES' },
+    { key: 'home_about_image', type: 'image_url', defaultValue: 'https://placehold.co/600x600/121415/96F01D?text=Bame' },
+    { key: 'home_about_subtitle', type: 'text', defaultValue: '# About Our Gaming Site' },
+    { key: 'home_about_title', type: 'text', defaultValue: 'Forging Legends In The Gaming Universe' },
+    { key: 'home_about_p1', type: 'textarea', defaultValue: 'We are dedicated to creating a vibrant and competitive ecosystem for gamers of all levels. From grassroots tournaments to professional leagues, we provide the platform for players to showcase their skills, connect with the community, and forge their own legacy.' },
+    { key: 'home_about_p2', type: 'textarea', defaultValue: 'Our state-of-the-art platform ensures fair play, seamless organization, and an electrifying experience for both participants and spectators.' },
+    { key: 'home_games_subtitle', type: 'text', defaultValue: '# Releases The Latest Game' },
+    { key: 'home_games_title', type: 'text', defaultValue: 'Game On, Power Up, Win Big!' },
+];
 
 const TournamentModalForm: React.FC<{
     onClose: () => void;
@@ -100,7 +119,8 @@ const AdminDashboard: React.FC = () => {
     tournaments,
     setTournaments, 
     leaderboard,
-    setLeaderboard
+    setLeaderboard,
+    setSiteContent
   } = useContext(AppContext) as AppContextType;
 
   const [allRegistrations, setAllRegistrations] = useState<Registration[]>([]);
@@ -108,6 +128,11 @@ const AdminDashboard: React.FC = () => {
   const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [editableLeaderboard, setEditableLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loadingRegistrations, setLoadingRegistrations] = useState(true);
+
+  // State for site content management
+  const [editableContent, setEditableContent] = useState<SiteContent>({});
+  const [mergedContentSchema, setMergedContentSchema] = useState<(SiteContentEntry & { defaultValue: string })[]>([]);
+  const [loadingContent, setLoadingContent] = useState(true);
 
   const fetchAdminData = async () => {
       setLoadingRegistrations(true);
@@ -136,6 +161,41 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     fetchAdminData();
     setEditableLeaderboard(JSON.parse(JSON.stringify(leaderboard)));
+    
+    // Fetch and merge site content for editing
+    const fetchContentForAdmin = async () => {
+        setLoadingContent(true);
+        const { data, error } = await supabase.from('site_content').select('*');
+        if (error) console.error("Error fetching site content for admin:", error);
+
+        const dbContentMap = (data || []).reduce((acc, item) => {
+            acc[item.key] = item;
+            return acc;
+        }, {} as Record<string, SiteContentEntry>);
+
+        const mergedSchema = contentSchema.map((schemaItem) => {
+            const dbItem = dbContentMap[schemaItem.key];
+            return {
+                id: dbItem?.id || 0,
+                created_at: dbItem?.created_at || new Date().toISOString(),
+                key: schemaItem.key,
+                type: schemaItem.type,
+                value: dbItem?.value ?? schemaItem.defaultValue,
+                defaultValue: schemaItem.defaultValue
+            };
+        });
+        setMergedContentSchema(mergedSchema);
+
+        const contentMapForState = mergedSchema.reduce((acc, item) => {
+            acc[item.key] = item.value;
+            return acc;
+        }, {} as SiteContent);
+
+        setEditableContent(contentMapForState);
+        setLoadingContent(false);
+    };
+    fetchContentForAdmin();
+
   }, [leaderboard]);
   
   useEffect(() => {
@@ -223,10 +283,75 @@ const AdminDashboard: React.FC = () => {
 
   const pendingRegistrations = allRegistrations.filter(r => r.status === 'Pending');
 
+  const handleContentChange = (key: string, value: string) => {
+    setEditableContent(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveContent = async () => {
+      const updates: SiteContentInsert[] = mergedContentSchema
+          .map(entry => ({
+              key: entry.key,
+              value: editableContent[entry.key],
+              type: entry.type
+          }));
+
+      if (updates.length === 0) {
+          alert("No content to update.");
+          return;
+      }
+
+      const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'key' });
+
+      if (error) {
+          alert("Error saving content: " + error.message);
+      } else {
+          setSiteContent(editableContent);
+          const updatedSchema = mergedContentSchema.map(entry => ({
+              ...entry,
+              value: editableContent[entry.key]
+          }));
+          setMergedContentSchema(updatedSchema);
+          alert("Site content saved successfully! The page will now use the new content.");
+      }
+  };
+
+
   return (
     <div className="space-y-8">
       <h1 className="text-4xl font-bold text-brand-yellow">Admin Dashboard</h1>
       
+      {/* Site Content Management */}
+      <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-white">Manage Site Content (Home Page)</h2>
+             <button onClick={handleSaveContent} className="btn bg-brand-green text-dark-1 hover:bg-opacity-80">Save Content</button>
+        </div>
+        {loadingContent ? <p className="text-light-2">Loading content editor...</p> : (
+            <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                {mergedContentSchema.map(entry => (
+                    <div key={entry.key} className={entry.type === 'textarea' ? 'md:col-span-2' : ''}>
+                        <label className="text-sm font-sans text-light-2 capitalize">{entry.key.replace(/_/g, ' ')}</label>
+                        {entry.type === 'textarea' ? (
+                            <textarea
+                                value={editableContent[entry.key] || ''}
+                                onChange={(e) => handleContentChange(entry.key, e.target.value)}
+                                className="input-field mt-1 h-24 w-full"
+                                rows={4}
+                            />
+                        ) : (
+                            <input
+                                type="text"
+                                value={editableContent[entry.key] || ''}
+                                onChange={(e) => handleContentChange(entry.key, e.target.value)}
+                                className="input-field mt-1 w-full"
+                            />
+                        )}
+                    </div>
+                ))}
+            </div>
+        )}
+      </div>
+
       {/* Tournament Management */}
       <div className="bg-dark-2 p-6 rounded-lg border border-white/10">
         <div className="flex justify-between items-center mb-4">
