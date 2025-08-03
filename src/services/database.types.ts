@@ -91,22 +91,7 @@ export interface Database {
           status?: string
           tournament_id?: number
         }
-        Relationships: [
-            {
-              foreignKeyName: "registrations_player_id_fkey"
-              columns: ["player_id"]
-              isOneToOne: false
-              referencedRelation: "profiles"
-              referencedColumns: ["id"]
-            },
-            {
-              foreignKeyName: "registrations_tournament_id_fkey"
-              columns: ["tournament_id"]
-              isOneToOne: false
-              referencedRelation: "tournaments"
-              referencedColumns: ["id"]
-            }
-          ]
+        Relationships: []
       }
       site_content: {
         Row: {
@@ -129,6 +114,57 @@ export interface Database {
           key?: string
           value?: string
           type?: "text" | "textarea" | "image_url"
+        }
+        Relationships: []
+      }
+      squads: {
+        Row: {
+          id: number
+          created_at: string
+          squad_name: string
+          captain_id: string
+          captain_name: string
+          player2_name: string
+          player3_name: string
+          player4_name: string
+          whatsapp_number: string
+          contact_email: string
+          status: string
+          bkash_number: string | null
+          bkash_last4: string | null
+          payment_screenshot_url: string | null
+        }
+        Insert: {
+          id?: number
+          created_at?: string
+          squad_name: string
+          captain_id: string
+          captain_name: string
+          player2_name: string
+          player3_name: string
+          player4_name: string
+          whatsapp_number: string
+          contact_email: string
+          status?: string
+          bkash_number?: string | null
+          bkash_last4?: string | null
+          payment_screenshot_url?: string | null
+        }
+        Update: {
+          id?: number
+          created_at?: string
+          squad_name?: string
+          captain_id?: string
+          captain_name?: string
+          player2_name?: string
+          player3_name?: string
+          player4_name?: string
+          whatsapp_number?: string
+          contact_email?: string
+          status?: string
+          bkash_number?: string | null
+          bkash_last4?: string | null
+          payment_screenshot_url?: string | null
         }
         Relationships: []
       }
@@ -198,7 +234,7 @@ export interface Database {
     }
     Functions: {
       handle_new_user: {
-        Args: Record<PropertyKey, never>
+        Args: {}
         Returns: void
       }
     }

@@ -81,6 +81,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <nav className="hidden lg:flex items-center space-x-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+            <NavItem label="Register Squad" isActive={currentView === 'squadRegistration'} onClick={() => onNavigate('squadRegistration')} />
             <div className="relative">
                 <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
                 {isLive && (
@@ -123,6 +124,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <div className="flex justify-around py-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+            <NavItem label="Register Squad" isActive={currentView === 'squadRegistration'} onClick={() => onNavigate('squadRegistration')} />
             <div className="relative">
                 <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
                 {isLive && (

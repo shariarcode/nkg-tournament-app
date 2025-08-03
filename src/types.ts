@@ -29,6 +29,9 @@ export interface Registration extends DbRegistration {
     tournamentName?: string;
 }
 
+// Squad type based on new squads table
+export type Squad = Database['public']['Tables']['squads']['Row'];
+
 
 // Leaderboard entry type based on Supabase table
 export type LeaderboardEntry = Database['public']['Tables']['leaderboard']['Row'];

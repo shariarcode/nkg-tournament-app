@@ -17,6 +17,7 @@ import Auth from './views/Auth';
 import TournamentDetails from './views/TournamentDetails';
 import SearchModal from './components/SearchModal';
 import Live from './views/Live';
+import SquadRegistration from './views/SquadRegistration';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -187,6 +188,8 @@ export default function App() {
         return <Home />;
       case 'tournaments':
         return <Tournaments />;
+      case 'squadRegistration':
+        return <SquadRegistration />;
       case 'profile':
         return <Profile />;
       case 'leaderboard':
