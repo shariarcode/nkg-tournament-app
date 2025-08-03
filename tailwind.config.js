@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -14,6 +15,12 @@ export default {
         'brand-yellow': '#E5A83D',
         'light-1': '#F5F5F5',
         'light-2': '#A0A0A0',
+
+        'light-bg': '#FFFFFF',
+        'light-surface': '#F5F5F5',
+        'light-element': '#E5E7EB',
+        'dark-text': '#121415',
+        'dark-text-secondary': '#6B7280',
       },
       fontFamily: {
         display: ['"Russo One"', 'sans-serif'],

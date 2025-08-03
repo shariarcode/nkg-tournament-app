@@ -14,7 +14,7 @@
         width: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #08090A; /* dark-1 */
+        background: #F5F5F5; /* light-surface */
       }
       ::-webkit-scrollbar-thumb {
         background: #96F01D; /* brand-green */
@@ -22,6 +22,9 @@
       }
       ::-webkit-scrollbar-thumb:hover {
         background: #82d618;
+      }
+      html.dark ::-webkit-scrollbar-track {
+        background: #08090A; /* dark-1 */
       }
     </style>
   <script type="importmap">
@@ -39,7 +42,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-dark-1">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>
   <script type="module" src="/index.tsx"></script>

@@ -131,7 +131,7 @@ export const NKGLogoIcon: React.FC<{ className?: string }> = ({ className }) => 
         {/* N part */}
         <path d="M20 0 L 20 100 L 35 100 L 65 30 L 65 100 L 80 100 L 80 0 L 65 0 L 35 70 L 35 0 L 20 0 Z" fill="#96F01D"/>
         {/* K part */}
-        <path d="M105 0 L 80 50 L 105 100 L 120 100 L 95 50 L 120 0 L 105 0 Z" fill="#FFFFFF"/>
+        <path d="M105 0 L 80 50 L 105 100 L 120 100 L 95 50 L 120 0 L 105 0 Z" className="fill-dark-text dark:fill-white"/>
         {/* G part */}
         <path d="M180 50 C 180 74.8528 159.853 95 135 95 L 135 80 C 151.569 80 165 66.5685 165 50 C 165 33.4315 151.569 20 135 20 L 135 5 C 159.853 5 180 25.1472 180 50 Z M135 57.5 H 155 V 42.5 H 135 V 57.5 Z" fill="#E5A83D"/>
     </svg>
@@ -143,4 +143,16 @@ export const GameIcon: React.FC<{ className?: string }> = ({ className }) => (
         <path d="M27.5 20L16.25 26.9282L16.25 13.0718L27.5 20Z" fill="currentColor"/>
         <circle cx="20" cy="20" r="12" stroke="currentColor" strokeWidth="2"/>
     </svg>
+);
+
+export const SunIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M12 12a6 6 0 110-12 6 6 0 010 12z" />
+  </svg>
+);
+
+export const MoonIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25c0 5.385 4.365 9.75 9.75 9.75 2.572 0 4.92-.99 6.752-2.648z" />
+  </svg>
 );

@@ -2,7 +2,7 @@
 
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
-import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent } from '../types';
+import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent, Squad } from '../types';
 import { supabase } from '../services/supabase';
 import type { Database } from '../services/database.types';
 import { XMarkIcon, PencilIcon, TrashIcon } from '../components/Icons';
@@ -13,7 +13,7 @@ type LeaderboardUpdate = Database['public']['Tables']['leaderboard']['Update'];
 type LeaderboardInsert = Database['public']['Tables']['leaderboard']['Insert'];
 type SiteContentInsert = Database['public']['Tables']['site_content']['Insert'];
 
-type AdminTab = 'registrations' | 'tournaments' | 'leaderboard' | 'content';
+type AdminTab = 'registrations' | 'squadRegistrations' | 'tournaments' | 'leaderboard' | 'content';
 type ContentTab = 'site' | 'home' | 'tournaments' | 'leaderboard';
 
 type ContentSchemaItem = Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { defaultValue: string; label: string; };
@@ -69,8 +69,12 @@ const AdminDashboard: React.FC = () => {
     const [activeTab, setActiveTab] = useState<AdminTab>('tournaments');
     
     // State for all registrations
-    const [allRegistrations, setAllRegistrations] =useState<Registration[]>([]);
+    const [allRegistrations, setAllRegistrations] = useState<Registration[]>([]);
     const [loadingRegistrations, setLoadingRegistrations] = useState(false);
+    
+    // State for squad registrations
+    const [allSquads, setAllSquads] = useState<Squad[]>([]);
+    const [loadingSquads, setLoadingSquads] = useState(false);
 
     // State for content management
     const [activeContentTab, setActiveContentTab] = useState<ContentTab>('site');
@@ -89,37 +93,69 @@ const AdminDashboard: React.FC = () => {
         setEditableContent(siteContent);
     }, [siteContent]);
 
-     useEffect(() => {
+    useEffect(() => {
         const fetchAllRegistrations = async () => {
             setLoadingRegistrations(true);
-            const { data, error } = await supabase
-                .from('registrations')
-                .select(`
-                    *,
-                    profiles ( name, free_fire_id ),
-                    tournaments ( name )
-                `)
-                .order('created_at', { ascending: false });
+            try {
+                const regPromise = supabase.from('registrations').select('*').order('created_at', { ascending: false });
+                const profilePromise = supabase.from('profiles').select('id, name, free_fire_id');
 
-            if (error) {
+                const [regResult, profileResult] = await Promise.all([regPromise, profilePromise]);
+
+                const { data: regData, error: regError } = regResult;
+                const { data: profileData, error: profileError } = profileResult;
+
+                if (regError || profileError) {
+                    throw regError || profileError;
+                }
+                
+                if (regData && profileData) {
+                    const profileMap = new Map(profileData.map(p => [p.id, p]));
+                    const tournamentMap = new Map(tournaments.map(t => [t.id, t]));
+
+                    const formattedRegs: Registration[] = regData.map(r => ({
+                        ...r,
+                        playerName: profileMap.get(r.player_id)?.name || 'N/A',
+                        playerFreeFireId: profileMap.get(r.player_id)?.free_fire_id || 'N/A',
+                        tournamentName: tournamentMap.get(r.tournament_id)?.name || 'N/A'
+                    }));
+                    setAllRegistrations(formattedRegs);
+                }
+            } catch (error: any) {
                 alert('Could not fetch registrations.');
-                console.error(error);
-            } else if (data) {
-                const formattedRegs = data.map((r: any) => ({
-                    ...r,
-                    playerName: r.profiles?.name || 'N/A',
-                    playerFreeFireId: r.profiles?.free_fire_id || 'N/A',
-                    tournamentName: r.tournaments?.name || 'N/A'
-                }));
-                setAllRegistrations(formattedRegs);
+                console.error(error.message || error);
+            } finally {
+                setLoadingRegistrations(false);
             }
-            setLoadingRegistrations(false);
+        };
+
+        const fetchAllSquads = async () => {
+            setLoadingSquads(true);
+            try {
+                const { data, error } = await supabase
+                    .from('squads')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+                setAllSquads(data || []);
+            } catch (error: any) {
+                 alert('Could not fetch squad registrations.');
+                 console.error(error.message || error);
+            } finally {
+                setLoadingSquads(false);
+            }
         };
 
         if (activeTab === 'registrations') {
             fetchAllRegistrations();
         }
-    }, [activeTab]);
+        if (activeTab === 'squadRegistrations') {
+            fetchAllSquads();
+        }
+    }, [activeTab, tournaments]);
 
 
     const handleUpdateRegistrationStatus = async (regId: number, newStatus: Registration['status']) => {
@@ -132,6 +168,19 @@ const AdminDashboard: React.FC = () => {
         } else {
             setAllRegistrations(regs => regs.map(r => r.id === regId ? {...r, status: newStatus} : r));
             alert("Registration status updated.");
+        }
+    };
+    
+    const handleUpdateSquadStatus = async (squadId: number, newStatus: Squad['status']) => {
+        const { error } = await supabase
+            .from('squads')
+            .update({ status: newStatus })
+            .eq('id', squadId);
+        if (error) {
+            alert(`Error updating squad status: ${error.message}`);
+        } else {
+            setAllSquads(squads => squads.map(s => s.id === squadId ? { ...s, status: newStatus } : s));
+            alert("Squad registration status updated.");
         }
     };
     
@@ -163,12 +212,12 @@ const AdminDashboard: React.FC = () => {
             if (isUpdate) {
                 const { data, error } = await supabase.from('tournaments').update(formData).eq('id', formData.id!).select().single();
                 if (error) throw error;
-                setTournaments(prev => prev.map(t => t.id === data.id ? data : t));
+                if(data) setTournaments(prev => prev.map(t => t.id === data.id ? data : t));
                 alert('Tournament updated successfully.');
             } else {
                 const { data, error } = await supabase.from('tournaments').insert(formData).select().single();
                 if (error) throw error;
-                setTournaments(prev => [data, ...prev]);
+                if (data) setTournaments(prev => [data, ...prev]);
                 alert('Tournament created successfully.');
             }
             setTournamentModalOpen(false);
@@ -205,12 +254,12 @@ const AdminDashboard: React.FC = () => {
             if (isUpdate) {
                 const { data, error } = await supabase.from('leaderboard').update(formData).eq('id', formData.id!).select().single();
                 if (error) throw error;
-                setLeaderboard(prev => prev.map(e => e.id === data.id ? data : e).sort((a,b) => (a.rank || 0) - (b.rank || 0)));
+                if(data) setLeaderboard(prev => prev.map(e => e.id === data.id ? data : e).sort((a,b) => (a.rank || 0) - (b.rank || 0)));
                 alert('Leaderboard entry updated.');
             } else {
                 const { data, error } = await supabase.from('leaderboard').insert(formData).select().single();
                 if (error) throw error;
-                setLeaderboard(prev => [...prev, data].sort((a, b) => (a.rank || 0) - (b.rank || 0)));
+                if (data) setLeaderboard(prev => [...prev, data].sort((a, b) => (a.rank || 0) - (b.rank || 0)));
                 alert('Leaderboard entry added.');
             }
             setLeaderboardModalOpen(false);
@@ -269,7 +318,7 @@ const AdminDashboard: React.FC = () => {
         if (loadingRegistrations) return <div className="text-center p-8">Loading registrations...</div>;
         return (
              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Manage Registrations</h2>
+                <h2 className="text-2xl font-bold">Manage Solo/Tournament Registrations</h2>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left font-sans">
                         <thead className="border-b-2 border-white/10 text-sm text-light-2 uppercase">
@@ -299,11 +348,69 @@ const AdminDashboard: React.FC = () => {
                                           </span>
                                     </td>
                                     <td className="p-3 text-center space-x-2">
-                                        <button onClick={() => handleUpdateRegistrationStatus(reg.id, 'Approved')} className="text-xs bg-green-600 px-2 py-1 rounded">Approve</button>
-                                        <button onClick={() => handleUpdateRegistrationStatus(reg.id, 'Rejected')} className="text-xs bg-red-600 px-2 py-1 rounded">Reject</button>
+                                        <button onClick={() => handleUpdateRegistrationStatus(reg.id, 'Approved')} className="text-xs bg-green-600 hover:bg-green-500 px-2 py-1 rounded">Approve</button>
+                                        <button onClick={() => handleUpdateRegistrationStatus(reg.id, 'Rejected')} className="text-xs bg-red-600 hover:bg-red-500 px-2 py-1 rounded">Reject</button>
                                     </td>
                                 </tr>
                             ))}
+                             {allRegistrations.length === 0 && (
+                                <tr>
+                                    <td colSpan={6} className="text-center p-8 text-light-2">No solo registrations found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+    };
+
+    const renderSquadRegistrations = () => {
+        if (loadingSquads) return <div className="text-center p-8">Loading squad registrations...</div>;
+        return (
+            <div className="space-y-4">
+                <h2 className="text-2xl font-bold">Manage Squad Registrations</h2>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left font-sans">
+                        <thead className="border-b-2 border-white/10 text-sm text-light-2 uppercase">
+                            <tr>
+                                <th className="p-3">Squad Name</th>
+                                <th className="p-3">Captain</th>
+                                <th className="p-3">Contact</th>
+                                <th className="p-3">bKash Info</th>
+                                <th className="p-3">Screenshot</th>
+                                <th className="p-3 text-center">Status</th>
+                                <th className="p-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {allSquads.map(squad => (
+                                <tr key={squad.id} className="border-b border-white/10 last:border-0 hover:bg-dark-3/50">
+                                    <td className="p-3 text-light-1 font-semibold">{squad.squad_name}</td>
+                                    <td className="p-3 text-light-2">{squad.captain_name}</td>
+                                    <td className="p-3 text-light-2 text-xs">{squad.whatsapp_number}<br />{squad.contact_email}</td>
+                                    <td className="p-3 text-light-2">{squad.bkash_number} ({squad.bkash_last4})</td>
+                                    <td className="p-3"><a href={squad.payment_screenshot_url || '#'} target="_blank" rel="noopener noreferrer" className="text-brand-green hover:underline">View</a></td>
+                                    <td className="p-3 text-center">
+                                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                                            squad.status === 'Pending' ? 'bg-brand-yellow text-dark-1' :
+                                            squad.status === 'Approved' ? 'bg-brand-green text-dark-1' :
+                                            'bg-red-800 text-white'
+                                        }`}>
+                                            {squad.status}
+                                        </span>
+                                    </td>
+                                    <td className="p-3 text-center space-x-2">
+                                        <button onClick={() => handleUpdateSquadStatus(squad.id, 'Approved')} className="text-xs bg-green-600 hover:bg-green-500 px-2 py-1 rounded">Approve</button>
+                                        <button onClick={() => handleUpdateSquadStatus(squad.id, 'Rejected')} className="text-xs bg-red-600 hover:bg-red-500 px-2 py-1 rounded">Reject</button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {allSquads.length === 0 && (
+                                <tr>
+                                    <td colSpan={7} className="text-center p-8 text-light-2">No squad registrations found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -464,6 +571,7 @@ const AdminDashboard: React.FC = () => {
     const renderTabContent = () => {
         switch (activeTab) {
             case 'registrations': return renderRegistrations();
+            case 'squadRegistrations': return renderSquadRegistrations();
             case 'tournaments': return renderTournaments();
             case 'leaderboard': return renderLeaderboard();
             case 'content': return renderContentManagement();
@@ -476,6 +584,7 @@ const AdminDashboard: React.FC = () => {
             <h1 className="text-4xl font-bold">Admin Dashboard</h1>
             <div className="flex flex-wrap gap-2 border-b-2 border-white/10 pb-4">
                 <button onClick={() => setActiveTab('registrations')} className={`btn ${activeTab === 'registrations' ? 'btn-primary' : 'bg-dark-3 text-light-1'}`}>Registrations</button>
+                <button onClick={() => setActiveTab('squadRegistrations')} className={`btn ${activeTab === 'squadRegistrations' ? 'btn-primary' : 'bg-dark-3 text-light-1'}`}>Squad Registrations</button>
                 <button onClick={() => setActiveTab('tournaments')} className={`btn ${activeTab === 'tournaments' ? 'btn-primary' : 'bg-dark-3 text-light-1'}`}>Tournaments</button>
                 <button onClick={() => setActiveTab('leaderboard')} className={`btn ${activeTab === 'leaderboard' ? 'btn-primary' : 'bg-dark-3 text-light-1'}`}>Leaderboard</button>
                 <button onClick={() => setActiveTab('content')} className={`btn ${activeTab === 'content' ? 'btn-primary' : 'bg-dark-3 text-light-1'}`}>Content</button>

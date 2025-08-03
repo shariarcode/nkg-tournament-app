@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { AppContext, AppContextType, View } from './contexts/AppContext';
+import { AppContext, AppContextType, View, Theme } from './contexts/AppContext';
 import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile, SiteContent, SiteContentEntry, DbRegistration } from './types';
 import { MOCK_TOURNAMENTS, MOCK_LEADERBOARD, ANONYMOUS_PLAYER } from './constants';
 import { supabase } from './services/supabase';
@@ -31,6 +31,27 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [siteContent, setSiteContent] = useState<SiteContent>({});
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== 'undefined' && window.localStorage) {
+        const storedTheme = window.localStorage.getItem('theme') as Theme;
+        if (storedTheme) return storedTheme;
+    }
+    return 'dark'; // Default to dark theme
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+        root.classList.add('dark');
+    } else {
+        root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  }, []);
 
   useEffect(() => {
     // Fetch initial data
@@ -176,7 +197,9 @@ export default function App() {
     session,
     siteContent,
     setSiteContent,
-  }), [player, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session, siteContent]);
+    theme,
+    toggleTheme,
+  }), [player, isAdminView, navigate, tournaments, leaderboard, registrations, handleSignOut, navigateToTournamentDetails, session, siteContent, theme, toggleTheme]);
   
   const renderView = () => {
     if (loading) {
@@ -209,7 +232,7 @@ export default function App() {
 
   return (
     <AppContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-dark-1 text-light-1 font-sans">
+      <div className="min-h-screen bg-light-bg text-dark-text dark:bg-dark-1 dark:text-light-1 font-sans">
         <Header 
             currentView={currentView} 
             onNavigate={navigate} 

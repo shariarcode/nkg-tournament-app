@@ -58,7 +58,15 @@ export interface Database {
           phone?: string | null
           profile_pic_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registrations: {
         Row: {
@@ -91,7 +99,22 @@ export interface Database {
           status?: string
           tournament_id?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "registrations_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       site_content: {
         Row: {
@@ -133,6 +156,7 @@ export interface Database {
           bkash_number: string | null
           bkash_last4: string | null
           payment_screenshot_url: string | null
+          tournament_id: number
         }
         Insert: {
           id?: number
@@ -149,6 +173,7 @@ export interface Database {
           bkash_number?: string | null
           bkash_last4?: string | null
           payment_screenshot_url?: string | null
+          tournament_id: number
         }
         Update: {
           id?: number
@@ -165,8 +190,24 @@ export interface Database {
           bkash_number?: string | null
           bkash_last4?: string | null
           payment_screenshot_url?: string | null
+          tournament_id?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "squads_captain_id_fkey"
+            columns: ["captain_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "squads_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tournaments: {
         Row: {

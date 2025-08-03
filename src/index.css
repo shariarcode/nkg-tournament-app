@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-dark-1 text-light-1 font-sans;
+    @apply bg-light-bg text-dark-text font-sans dark:bg-dark-1 dark:text-light-1;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display uppercase;
@@ -14,10 +14,10 @@
 @layer components {
   /* Custom border with gradient */
   .card-border {
-    @apply relative p-px bg-gradient-to-b from-white/20 to-transparent rounded-2xl;
+    @apply relative p-px bg-gradient-to-b from-black/20 to-transparent dark:from-white/20 rounded-2xl;
   }
   .card-border-content {
-     @apply bg-dark-2 rounded-[15px] h-full w-full;
+     @apply bg-light-surface dark:bg-dark-2 rounded-[15px] h-full w-full;
   }
 
   .btn {
@@ -31,7 +31,7 @@
   }
 
   .input-field {
-    @apply w-full bg-dark-3 border border-dark-3 rounded-lg px-4 py-3 text-light-1 placeholder-light-2/50 focus:outline-none focus:ring-2 focus:ring-brand-green;
+    @apply w-full bg-light-element dark:bg-dark-3 border border-transparent dark:border-dark-3 rounded-lg px-4 py-3 text-dark-text dark:text-light-1 placeholder-dark-text-secondary dark:placeholder-light-2/50 focus:outline-none focus:ring-2 focus:ring-brand-green;
   }
 
   /* Aspect ratio for video embeds */

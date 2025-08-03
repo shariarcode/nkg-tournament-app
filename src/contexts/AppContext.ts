@@ -4,6 +4,8 @@ import { Session } from '@supabase/supabase-js';
 
 export type View = 'home' | 'tournaments' | 'profile' | 'leaderboard' | 'tournamentDetails' | 'live' | 'squadRegistration';
 
+export type Theme = 'light' | 'dark';
+
 export interface AppContextType {
   player: Player;
   setPlayer: React.Dispatch<React.SetStateAction<Player>>;
@@ -22,6 +24,8 @@ export interface AppContextType {
   session: Session | null;
   siteContent: SiteContent;
   setSiteContent: React.Dispatch<React.SetStateAction<SiteContent>>;
+  theme: Theme;
+  toggleTheme: () => void;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);
