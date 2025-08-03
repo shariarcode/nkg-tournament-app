@@ -1,8 +1,10 @@
+
 import React, { useContext, useState, useEffect } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { Registration, Tournament, LeaderboardEntry, SiteContentEntry, SiteContent } from '../types';
 import { supabase } from '../services/supabase';
 import type { Database } from '../services/database.types';
+import { XMarkIcon } from '../components/Icons';
 
 type TournamentUpdate = Database['public']['Tables']['tournaments']['Update'];
 type TournamentInsert = Database['public']['Tables']['tournaments']['Insert'];
@@ -14,10 +16,25 @@ type ContentTab = 'site' | 'home' | 'tournaments' | 'leaderboard';
 
 type ContentSchemaItem = Omit<SiteContentEntry, 'id' | 'created_at' | 'value'> & { defaultValue: string; label: string; };
 
-// Schemas for editable content, now with labels for better UX in the admin panel.
+// Helper to get live URLs, handles legacy single URL and new JSON array format
+const getLiveUrls = (content: SiteContent, key: string, legacyKey: string): string[] => {
+    const urlsJson = content[key];
+    if (urlsJson) {
+        try {
+            const parsed = JSON.parse(urlsJson);
+            if(Array.isArray(parsed)) return parsed.filter(u => u && typeof u === 'string');
+        } catch {}
+    }
+    const legacyUrl = content[legacyKey];
+    if (legacyUrl && typeof legacyUrl === 'string' && legacyUrl.trim() !== '') {
+        return [legacyUrl];
+    }
+    return [];
+}
+
 const siteWideContentSchema: ContentSchemaItem[] = [
-    { key: 'youtube_live_url', type: 'text', defaultValue: '', label: 'YouTube Live URL' },
-    { key: 'facebook_live_url', type: 'text', defaultValue: '', label: 'Facebook Live URL' },
+    { key: 'youtube_live_urls', type: 'textarea', defaultValue: '[]', label: 'YouTube Live URLs' },
+    { key: 'facebook_live_urls', type: 'textarea', defaultValue: '[]', label: 'Facebook Live URLs' },
 ];
 
 const homeContentSchema: ContentSchemaItem[] = [
@@ -101,21 +118,39 @@ const AdminDashboard: React.FC = () => {
     
     const handleContentSave = async () => {
         setIsContentSaving(true);
+        const contentToUpdate = { ...editableContent };
+    
+        // Consolidate YouTube URLs to the new key, filtering empty strings
+        const finalYoutubeUrls = getLiveUrls(contentToUpdate, 'youtube_live_urls', 'youtube_live_url');
+        contentToUpdate['youtube_live_urls'] = JSON.stringify(finalYoutubeUrls.filter(u => u.trim() !== ''));
+        delete contentToUpdate['youtube_live_url'];
+    
+        // Consolidate Facebook URLs to the new key, filtering empty strings
+        const finalFacebookUrls = getLiveUrls(contentToUpdate, 'facebook_live_urls', 'facebook_live_url');
+        contentToUpdate['facebook_live_urls'] = JSON.stringify(finalFacebookUrls.filter(u => u.trim() !== ''));
+        delete contentToUpdate['facebook_live_url'];
+
         const schemas = [...siteWideContentSchema, ...homeContentSchema, ...tournamentsContentSchema, ...leaderboardContentSchema];
-        const updates: SiteContentInsert[] = Object.keys(editableContent).map(key => {
-            const schemaItem = schemas.find(s => s.key === key);
+        const upsertData: SiteContentInsert[] = Object.keys(contentToUpdate)
+          .filter(key => schemas.some(s => s.key === key)) // only upsert keys defined in schemas
+          .map(key => {
+            const schemaItem = schemas.find(s => s.key === key)!;
             return {
                 key,
-                value: editableContent[key] || '',
-                type: schemaItem?.type || 'text'
+                value: contentToUpdate[key] || '',
+                type: schemaItem.type
             };
         });
         
         try {
-            const { error } = await supabase.from('site_content').upsert(updates, { onConflict: 'key' });
-            if (error) throw error;
+            const { error: upsertError } = await supabase.from('site_content').upsert(upsertData, { onConflict: 'key' });
+            if (upsertError) throw upsertError;
+
+            // After successful upsert, delete the old keys from the database to finalize migration
+            const { error: deleteError } = await supabase.from('site_content').delete().in('key', ['youtube_live_url', 'facebook_live_url']);
+            if (deleteError) console.error("Could not delete legacy keys:", deleteError.message); // Non-critical error
             
-            setSiteContent(editableContent); // Update global context
+            setSiteContent(contentToUpdate); // Update global context with migrated data
             alert("Content saved successfully!");
         } catch (error: any) {
             console.error("Error saving content:", error);
@@ -188,12 +223,62 @@ const AdminDashboard: React.FC = () => {
     const renderLeaderboard = () => <div className="text-center p-8 text-light-2">Leaderboard management coming soon.</div>;
 
     const renderContentManagement = () => {
-         const schemas: Record<ContentTab, {label: string, schema: ContentSchemaItem[]}> = {
-             site: { label: 'Site-wide Settings', schema: siteWideContentSchema },
-             home: { label: 'Home Page', schema: homeContentSchema },
-             tournaments: { label: 'Tournaments Page', schema: tournamentsContentSchema },
-             leaderboard: { label: 'Leaderboard Page', schema: leaderboardContentSchema },
-         };
+        const schemas: Record<ContentTab, {label: string, schema: ContentSchemaItem[]}> = {
+            site: { label: 'Site-wide Settings', schema: siteWideContentSchema },
+            home: { label: 'Home Page', schema: homeContentSchema },
+            tournaments: { label: 'Tournaments Page', schema: tournamentsContentSchema },
+            leaderboard: { label: 'Leaderboard Page', schema: leaderboardContentSchema },
+        };
+
+       const renderUrlManager = (
+            label: string,
+            contentKey: 'youtube_live_urls' | 'facebook_live_urls', 
+            legacyKey: 'youtube_live_url' | 'facebook_live_url'
+        ) => {
+            const urls = getLiveUrls(editableContent, contentKey, legacyKey);
+        
+            const handleUrlChange = (index: number, value: string) => {
+                const newUrls = [...urls];
+                newUrls[index] = value;
+                handleContentChange(contentKey, JSON.stringify(newUrls));
+            };
+        
+            const addUrl = () => {
+                const newUrls = [...urls, ''];
+                handleContentChange(contentKey, JSON.stringify(newUrls));
+            };
+        
+            const removeUrl = (index: number) => {
+                const newUrls = urls.filter((_, i) => i !== index);
+                handleContentChange(contentKey, JSON.stringify(newUrls));
+            };
+        
+            return (
+                <div key={contentKey}>
+                    <label className="block text-sm font-medium text-light-2 mb-2">{label}</label>
+                    <div className="space-y-2">
+                        {urls.map((url, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={url}
+                                    onChange={e => handleUrlChange(index, e.target.value)}
+                                    className="input-field font-sans flex-grow"
+                                    placeholder="Enter full live stream URL..."
+                                />
+                                <button onClick={() => removeUrl(index)} className="btn !p-2.5 bg-red-800 text-white hover:bg-red-700 rounded-lg">
+                                    <XMarkIcon className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                         {urls.length === 0 && <p className="text-sm text-light-2/70 font-sans p-2">No URLs added.</p>}
+                    </div>
+                    <button onClick={addUrl} className="btn !py-2 !px-4 text-sm bg-dark-3 hover:bg-white/10 mt-2 rounded-lg">
+                        Add URL
+                    </button>
+                </div>
+            );
+        };
 
         const currentSchema = schemas[activeContentTab].schema;
 
@@ -214,29 +299,40 @@ const AdminDashboard: React.FC = () => {
                     ))}
                 </div>
 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                    {currentSchema.map(({ key, label, type, defaultValue }) => (
-                        <div key={key}>
-                            <label htmlFor={key} className="block text-sm font-medium text-light-2 mb-1">{label}</label>
-                            {type === 'textarea' ? (
-                                <textarea
-                                    id={key}
-                                    value={editableContent[key] ?? defaultValue}
-                                    onChange={e => handleContentChange(key, e.target.value)}
-                                    className="input-field min-h-[100px] font-sans"
-                                    rows={4}
-                                />
-                            ) : (
-                                <input
-                                    type="text"
-                                    id={key}
-                                    value={editableContent[key] ?? defaultValue}
-                                    onChange={e => handleContentChange(key, e.target.value)}
-                                    className="input-field font-sans"
-                                />
-                            )}
-                        </div>
-                    ))}
+                <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+                    {currentSchema.map(({ key, label, type, defaultValue }) => {
+                        // Custom renderer for URL managers
+                        if (key === 'youtube_live_urls') {
+                            return renderUrlManager(label, 'youtube_live_urls', 'youtube_live_url');
+                        }
+                        if (key === 'facebook_live_urls') {
+                             return renderUrlManager(label, 'facebook_live_urls', 'facebook_live_url');
+                        }
+
+                        // Default renderer for other types
+                        return (
+                            <div key={key}>
+                                <label htmlFor={key} className="block text-sm font-medium text-light-2 mb-1">{label}</label>
+                                {type === 'textarea' ? (
+                                    <textarea
+                                        id={key}
+                                        value={editableContent[key] ?? defaultValue}
+                                        onChange={e => handleContentChange(key, e.target.value)}
+                                        className="input-field min-h-[100px] font-sans"
+                                        rows={4}
+                                    />
+                                ) : (
+                                    <input
+                                        type="text"
+                                        id={key}
+                                        value={editableContent[key] ?? defaultValue}
+                                        onChange={e => handleContentChange(key, e.target.value)}
+                                        className="input-field font-sans"
+                                    />
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         )

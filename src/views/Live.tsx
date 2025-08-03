@@ -1,6 +1,8 @@
+
 import React, { useContext } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { YoutubeIcon, FacebookIcon } from '../components/Icons';
+import { SiteContent } from '../types';
 
 // Helper to extract YouTube video ID from various URL formats
 const getYoutubeEmbedUrl = (url: string): string | null => {
@@ -31,6 +33,22 @@ const getFacebookEmbedUrl = (url: string): string | null => {
     return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0&width=734&autoplay=1&mute=1`;
 };
 
+// Helper to get live URLs, handles legacy single URL and new JSON array format
+const getLiveUrls = (content: SiteContent, key: string, legacyKey: string): string[] => {
+    const urlsJson = content[key];
+    if (urlsJson) {
+        try {
+            const parsed = JSON.parse(urlsJson);
+            if(Array.isArray(parsed)) return parsed.filter(u => u && typeof u === 'string' && u.trim() !== '');
+        } catch {}
+    }
+    const legacyUrl = content[legacyKey];
+    if (legacyUrl && typeof legacyUrl === 'string' && legacyUrl.trim() !== '') {
+        return [legacyUrl];
+    }
+    return [];
+}
+
 const LiveStreamEmbed: React.FC<{ title: string; embedUrl: string; icon: React.ReactNode }> = ({ title, embedUrl, icon }) => (
     <div className="bg-dark-2 p-4 rounded-xl border border-white/10 shadow-lg">
         <div className="flex items-center gap-3 mb-4">
@@ -53,10 +71,13 @@ const LiveStreamEmbed: React.FC<{ title: string; embedUrl: string; icon: React.R
 const Live: React.FC = () => {
     const { siteContent } = useContext(AppContext) as AppContextType;
 
-    const youtubeUrl = getYoutubeEmbedUrl(siteContent.youtube_live_url || '');
-    const facebookUrl = getFacebookEmbedUrl(siteContent.facebook_live_url || '');
+    const youtubeUrls = getLiveUrls(siteContent, 'youtube_live_urls', 'youtube_live_url');
+    const facebookUrls = getLiveUrls(siteContent, 'facebook_live_urls', 'facebook_live_url');
 
-    const hasLiveStreams = youtubeUrl || facebookUrl;
+    const youtubeEmbedUrls = youtubeUrls.map(getYoutubeEmbedUrl).filter((url): url is string => url !== null);
+    const facebookEmbedUrls = facebookUrls.map(getFacebookEmbedUrl).filter((url): url is string => url !== null);
+
+    const hasLiveStreams = youtubeEmbedUrls.length > 0 || facebookEmbedUrls.length > 0;
 
     return (
         <div className="max-w-7xl mx-auto space-y-12 animate-fade-in-up">
@@ -67,20 +88,22 @@ const Live: React.FC = () => {
 
             {hasLiveStreams ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {youtubeUrl && (
+                    {youtubeEmbedUrls.map((embedUrl, index) => (
                         <LiveStreamEmbed 
-                            title="YouTube Live" 
-                            embedUrl={youtubeUrl} 
+                            key={`yt-${index}`}
+                            title={`YouTube Live${youtubeEmbedUrls.length > 1 ? ` #${index + 1}` : ''}`} 
+                            embedUrl={embedUrl} 
                             icon={<YoutubeIcon className="w-8 h-8 text-red-600"/>} 
                         />
-                    )}
-                    {facebookUrl && (
+                    ))}
+                    {facebookEmbedUrls.map((embedUrl, index) => (
                         <LiveStreamEmbed 
-                            title="Facebook Live" 
-                            embedUrl={facebookUrl} 
+                            key={`fb-${index}`}
+                            title={`Facebook Live${facebookEmbedUrls.length > 1 ? ` #${index + 1}` : ''}`} 
+                            embedUrl={embedUrl} 
                             icon={<FacebookIcon className="w-8 h-8 text-blue-500"/>}
                         />
-                    )}
+                    ))}
                 </div>
             ) : (
                 <div className="text-center bg-dark-2 p-12 rounded-xl border border-white/10">

@@ -1,6 +1,8 @@
+
 import React, { useContext } from 'react';
 import { View, AppContext, AppContextType } from '../contexts/AppContext';
 import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, NKGLogoIcon } from './Icons';
+import { SiteContent } from '../types';
 
 interface HeaderProps {
   currentView: View;
@@ -30,11 +32,28 @@ const NavItem: React.FC<{
   </button>
 );
 
+// Helper to get live URLs, handles legacy single URL and new JSON array format
+const getLiveUrls = (content: SiteContent, key: string, legacyKey: string): string[] => {
+    const urlsJson = content[key];
+    if (urlsJson) {
+        try {
+            const parsed = JSON.parse(urlsJson);
+            if(Array.isArray(parsed)) return parsed.filter(u => u && typeof u === 'string' && u.trim() !== '');
+        } catch {}
+    }
+    const legacyUrl = content[legacyKey];
+    if (legacyUrl && typeof legacyUrl === 'string' && legacyUrl.trim() !== '') {
+        return [legacyUrl];
+    }
+    return [];
+}
+
 const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, isAdminView, onSetIsAdminView, onSearchClick }) => {
   const { player, signOut, siteContent } = useContext(AppContext) as AppContextType;
 
-  const isLive = (siteContent?.youtube_live_url && siteContent.youtube_live_url.trim() !== '') || 
-                 (siteContent?.facebook_live_url && siteContent.facebook_live_url.trim() !== '');
+  const youtubeUrls = getLiveUrls(siteContent || {}, 'youtube_live_urls', 'youtube_live_url');
+  const facebookUrls = getLiveUrls(siteContent || {}, 'facebook_live_urls', 'facebook_live_url');
+  const isLive = youtubeUrls.length > 0 || facebookUrls.length > 0;
 
   return (
     <header className="bg-dark-1/80 backdrop-blur-sm sticky top-0 z-40 border-b border-white/10">
@@ -62,15 +81,15 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <nav className="hidden lg:flex items-center space-x-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
-             {isLive && (
-                <div className="relative">
-                    <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
+            <div className="relative">
+                <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
+                {isLive && (
                     <span className="absolute top-1 right-1 flex h-3 w-3">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                     </span>
-                </div>
-            )}
+                )}
+            </div>
             <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
             <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </nav>
@@ -104,7 +123,15 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <div className="flex justify-around py-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
-            {isLive && <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />}
+            <div className="relative">
+                <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
+                {isLive && (
+                    <span className="absolute top-1 right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                )}
+            </div>
             <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
             <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </div>
