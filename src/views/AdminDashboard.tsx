@@ -22,7 +22,9 @@ const getLiveUrls = (content: SiteContent, key: string, legacyKey: string): stri
     if (urlsJson) {
         try {
             const parsed = JSON.parse(urlsJson);
-            if(Array.isArray(parsed)) return parsed.filter(u => u && typeof u === 'string');
+            // Allow empty strings in the array so new fields can be rendered for editing.
+            // Falsy empty strings were being filtered out, preventing the 'Add' button from working.
+            if(Array.isArray(parsed)) return parsed.filter(u => typeof u === 'string');
         } catch {}
     }
     const legacyUrl = content[legacyKey];
