@@ -1,4 +1,5 @@
 
+
 import { Tournament, Player, LeaderboardEntry, Game } from './types';
 
 export const ANONYMOUS_PLAYER: Player = {
@@ -14,10 +15,10 @@ export const ANONYMOUS_PLAYER: Player = {
 
 // Mock data for games on the home page
 export const MOCK_GAMES: Game[] = [
-  { id: 1, title: 'The Hunter Killer', imageUrl: 'https://placehold.co/400x500/121415/96F01D?text=Hunter+Killer', entryFee: '$10.00' },
+  { id: 1, title: 'The Hunter Killer', imageUrl: 'https://placehold.co/400x500/121415/96F01D?text=Hunter+Killer', entryFee: '৳100' },
   { id: 2, title: 'Net Remaining Monies', imageUrl: 'https://placehold.co/400x500/121415/E5A83D?text=Monies', entryFee: 'Free' },
-  { id: 3, title: 'duty Balck Ops', imageUrl: 'https://placehold.co/400x500/121415/3357ff?text=Balck+Ops', entryFee: '$10.00' },
-  { id: 4, title: 'League of Legends', imageUrl: 'https://placehold.co/400x500/121415/ff33a1?text=LoL', entryFee: '$10.00' },
+  { id: 3, title: 'duty Balck Ops', imageUrl: 'https://placehold.co/400x500/121415/3357ff?text=Balck+Ops', entryFee: '৳100' },
+  { id: 4, title: 'League of Legends', imageUrl: 'https://placehold.co/400x500/121415/ff33a1?text=LoL', entryFee: '৳100' },
 ];
 
 

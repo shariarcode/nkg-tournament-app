@@ -65,9 +65,9 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onClick }) 
 
         {/* Details Grid */}
         <div className="grid grid-cols-3 gap-y-4 gap-x-2 mb-5">
-          {detailItem('Prize Pool', `₹${prize_pool.toLocaleString()}`, 'text-brand-yellow')}
-          {detailItem('Per Kill', `₹${per_kill_prize || 0}`)}
-          {detailItem('Play For', entry_fee === 0 ? 'FREE' : `₹${entry_fee}`, entry_fee === 0 ? 'text-brand-green font-display' : '')}
+          {detailItem('Prize Pool', `৳${prize_pool.toLocaleString()}`, 'text-brand-yellow')}
+          {detailItem('Per Kill', `৳${per_kill_prize || 0}`)}
+          {detailItem('Play For', entry_fee === 0 ? 'FREE' : `৳${entry_fee}`, entry_fee === 0 ? 'text-brand-green font-display' : '')}
           {detailItem('Type', type || 'N/A')}
           {detailItem('Version', version || 'N/A')}
           {detailItem('Map', map || 'N/A')}

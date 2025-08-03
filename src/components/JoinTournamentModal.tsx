@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useContext, useRef } from 'react';
 import { Tournament, Registration, DbRegistration } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
@@ -127,7 +128,7 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
             {/* Payment Info */}
             <div>
               <h3 className="text-lg font-semibold text-light-1 mb-2">Payment Details</h3>
-              <p className="text-sm text-yellow-200 mb-4 bg-yellow-900/50 p-3 rounded-lg font-sans">Pay <strong className="text-white">{tournament.entry_fee} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
+              <p className="text-sm text-yellow-200 mb-4 bg-yellow-900/50 p-3 rounded-lg font-sans">Pay <strong className="text-white">৳{tournament.entry_fee} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
               <div className="space-y-4">
                  <input type="tel" placeholder="Your bKash Number" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} required className="input-field" />
                  <input type="tel" placeholder="Last 4 Digits of Transaction ID" value={bkashLast4} onChange={(e) => setBkashLast4(e.target.value)} maxLength={4} required className="input-field" />
