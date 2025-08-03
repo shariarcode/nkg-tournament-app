@@ -1,4 +1,5 @@
 
+
 import React, { useState, useContext } from 'react';
 import { Tournament } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
@@ -47,7 +48,7 @@ const Tournaments: React.FC = () => {
             <AngledTab label="Finished" isActive={filter === 'Finished'} onClick={() => setFilter('Finished')} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredTournaments.map(t => (
             <TournamentCard 
               key={t.id} 

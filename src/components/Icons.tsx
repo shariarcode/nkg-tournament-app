@@ -130,3 +130,11 @@ export const NKGLogoIcon: React.FC<{ className?: string }> = ({ className }) => 
         <path d="M180 50 C 180 74.8528 159.853 95 135 95 L 135 80 C 151.569 80 165 66.5685 165 50 C 165 33.4315 151.569 20 135 20 L 135 5 C 159.853 5 180 25.1472 180 50 Z M135 57.5 H 155 V 42.5 H 135 V 57.5 Z" fill="#E5A83D"/>
     </svg>
 );
+
+export const GameIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="20" cy="20" r="19" stroke="currentColor" strokeWidth="2"/>
+        <path d="M27.5 20L16.25 26.9282L16.25 13.0718L27.5 20Z" fill="currentColor"/>
+        <circle cx="20" cy="20" r="12" stroke="currentColor" strokeWidth="2"/>
+    </svg>
+);

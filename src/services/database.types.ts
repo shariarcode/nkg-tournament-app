@@ -134,40 +134,61 @@ export interface Database {
       }
       tournaments: {
         Row: {
+          banner_image_url: string | null
           created_at: string
           date: string
           entry_fee: number
           id: number
+          map: string | null
           name: string
+          per_kill_prize: number | null
           prize_pool: number
           room_id: string | null
           room_password: string | null
+          spots_filled: number | null
           status: string
           time: string
+          total_spots: number | null
+          type: string | null
+          version: string | null
         }
         Insert: {
+          banner_image_url?: string | null
           created_at?: string
           date: string
           entry_fee: number
           id?: number
+          map?: string | null
           name: string
+          per_kill_prize?: number | null
           prize_pool: number
           room_id?: string | null
           room_password?: string | null
+          spots_filled?: number | null
           status?: string
           time: string
+          total_spots?: number | null
+          type?: string | null
+          version?: string | null
         }
         Update: {
+          banner_image_url?: string | null
           created_at?: string
           date?: string
           entry_fee?: number
           id?: number
+          map?: string | null
           name?: string
+          per_kill_prize?: number | null
           prize_pool?: number
           room_id?: string | null
           room_password?: string | null
+          spots_filled?: number | null
           status?: string
           time?: string
+          total_spots?: number | null
+          type?: string | null
+          version?: string | null
         }
         Relationships: []
       }
