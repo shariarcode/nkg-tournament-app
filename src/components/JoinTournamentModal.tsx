@@ -83,7 +83,7 @@ const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({ tournament, o
       
       if (regData) {
         const newRegWithTournamentName: Registration = { 
-            ...(regData as DbRegistration), 
+            ...regData, 
             tournamentName: tournament.name 
         };
         setRegistrations(prev => [...prev, newRegWithTournamentName]);

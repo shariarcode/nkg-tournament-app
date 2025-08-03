@@ -33,4 +33,13 @@
   .input-field {
     @apply w-full bg-dark-3 border border-dark-3 rounded-lg px-4 py-3 text-light-1 placeholder-light-2/50 focus:outline-none focus:ring-2 focus:ring-brand-green;
   }
+
+  /* Aspect ratio for video embeds */
+  .aspect-video {
+    @apply relative w-full;
+    padding-top: 56.25%; /* 16:9 ratio */
+  }
+  .aspect-video iframe {
+    @apply absolute top-0 left-0 w-full h-full;
+  }
 }

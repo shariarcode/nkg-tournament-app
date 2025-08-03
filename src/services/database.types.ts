@@ -92,7 +92,20 @@ export interface Database {
           status?: string
           tournament_id?: number
         }
-        Relationships: []
+        Relationships: [
+            {
+              foreignKeyName: "registrations_player_id_fkey"
+              columns: ["player_id"]
+              referencedRelation: "profiles"
+              referencedColumns: ["id"]
+            },
+            {
+              foreignKeyName: "registrations_tournament_id_fkey"
+              columns: ["tournament_id"]
+              referencedRelation: "tournaments"
+              referencedColumns: ["id"]
+            }
+          ]
       }
       site_content: {
         Row: {

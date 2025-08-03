@@ -1,7 +1,4 @@
 
-
-
-
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AppContext, AppContextType, View } from './contexts/AppContext';
 import { Player, Tournament, Registration, LeaderboardEntry, SupabaseProfile, SiteContent, SiteContentEntry, DbRegistration } from './types';
@@ -19,6 +16,7 @@ import AIChat from './components/AIChat';
 import Auth from './views/Auth';
 import TournamentDetails from './views/TournamentDetails';
 import SearchModal from './components/SearchModal';
+import Live from './views/Live';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -46,17 +44,17 @@ export default function App() {
 
         const { data: tourneyData, error: tourneyError } = tourneyResult;
         if (tourneyError) throw tourneyError;
-        setTournaments((tourneyData as Tournament[]) || []);
+        setTournaments(tourneyData || []);
 
         const { data: leaderboardData, error: leaderboardError } = leaderboardResult;
         if (leaderboardError) throw leaderboardError;
-        setLeaderboard((leaderboardData as LeaderboardEntry[]) || []);
+        setLeaderboard(leaderboardData || []);
         
         const { data: contentData, error: contentError } = contentResult;
         if (contentError) {
           console.error("Error fetching site content:", contentError);
         } else if (contentData) {
-          const contentMap = (contentData as SiteContentEntry[]).reduce((acc, item) => {
+          const contentMap = contentData.reduce((acc, item) => {
             acc[item.key] = item.value;
             return acc;
           }, {} as SiteContent);
@@ -98,7 +96,7 @@ export default function App() {
           console.error('Error fetching user profile:', error);
           await handleSignOut();
         } else if (profile) {
-          const typedProfile = profile as SupabaseProfile;
+          const typedProfile = profile;
           const fetchedPlayer: Player = {
             id: typedProfile.id,
             name: typedProfile.name || 'New Player',
@@ -120,7 +118,7 @@ export default function App() {
           if (regError) {
             console.error("Error fetching registrations", regError);
           } else if (regData) {
-            const formattedRegs: Registration[] = (regData || []).map(reg => ({
+            const formattedRegs: Registration[] = regData.map(reg => ({
                 ...reg,
                 tournamentName: tournaments.find(t => t.id === reg.tournament_id)?.name || 'N/A'
             }));
@@ -193,6 +191,8 @@ export default function App() {
         return <Profile />;
       case 'leaderboard':
         return <Leaderboard />;
+      case 'live':
+        return <Live />;
       case 'tournamentDetails':
         return selectedTournamentForDetails ? <TournamentDetails tournament={selectedTournamentForDetails} /> : <Tournaments />;
       default:

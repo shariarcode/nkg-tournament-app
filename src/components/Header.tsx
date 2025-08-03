@@ -1,5 +1,3 @@
-
-
 import React, { useContext } from 'react';
 import { View, AppContext, AppContextType } from '../contexts/AppContext';
 import { ChevronDownIcon, SearchIcon, FacebookIcon, TwitterIcon, InstagramIcon, NKGLogoIcon } from './Icons';
@@ -33,7 +31,10 @@ const NavItem: React.FC<{
 );
 
 const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, isAdminView, onSetIsAdminView, onSearchClick }) => {
-  const { player, signOut } = useContext(AppContext) as AppContextType;
+  const { player, signOut, siteContent } = useContext(AppContext) as AppContextType;
+
+  const isLive = (siteContent?.youtube_live_url && siteContent.youtube_live_url.trim() !== '') || 
+                 (siteContent?.facebook_live_url && siteContent.facebook_live_url.trim() !== '');
 
   return (
     <header className="bg-dark-1/80 backdrop-blur-sm sticky top-0 z-40 border-b border-white/10">
@@ -61,11 +62,20 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <nav className="hidden lg:flex items-center space-x-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+             {isLive && (
+                <div className="relative">
+                    <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />
+                    <span className="absolute top-1 right-1 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                </div>
+            )}
             <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
             <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </nav>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 md:space-x-4">
               <button onClick={onSearchClick} className="text-light-2 hover:text-white"><SearchIcon className="h-5 w-5"/></button>
               <div className="w-px h-6 bg-white/20"></div>
               <div className="flex items-center space-x-2">
@@ -75,12 +85,11 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
               {isUserAdmin && (
                 <button 
                   onClick={() => onSetIsAdminView(!isAdminView)} 
-                  className="btn !px-5 !py-2.5 bg-brand-yellow text-dark-1 hover:bg-opacity-80 shadow-yellow-glow"
+                  className="btn !px-4 !py-2 bg-brand-yellow text-dark-1 hover:bg-opacity-80 shadow-yellow-glow"
                 >
-                  {isAdminView ? 'Exit Admin' : 'Admin Panel'}
+                  {isAdminView ? 'Exit' : 'Admin'}
                 </button>
               )}
-              <button className="btn btn-primary !px-5 !py-2.5">Live Streaming</button>
               <button onClick={signOut} className="text-light-2 hover:text-white" aria-label="Sign Out">
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -95,6 +104,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onNavigate, isUserAdmin, i
           <div className="flex justify-around py-2">
             <NavItem label="Home" isActive={currentView === 'home'} onClick={() => onNavigate('home')} />
             <NavItem label="Tournaments" isActive={currentView === 'tournaments'} onClick={() => onNavigate('tournaments')} />
+            {isLive && <NavItem label="Live" isActive={currentView === 'live'} onClick={() => onNavigate('live')} />}
             <NavItem label="Leaderboard" isActive={currentView === 'leaderboard'} onClick={() => onNavigate('leaderboard')} />
             <NavItem label="Profile" isActive={currentView === 'profile'} onClick={() => onNavigate('profile')} />
           </div>

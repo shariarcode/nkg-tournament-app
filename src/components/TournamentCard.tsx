@@ -1,6 +1,5 @@
 import React from 'react';
 import { Tournament } from '../types';
-import { YoutubeIcon, TwitchIcon } from './Icons';
 
 interface TournamentCardProps {
   tournament: Tournament;
@@ -53,16 +52,6 @@ const TournamentCard: React.FC<TournamentCardProps> = ({ tournament, onClick }) 
                     {getStatusChip()}
                     <h3 className="text-xl text-white group-hover:text-brand-green transition-colors mb-2 mt-4">{tournament.name}</h3>
                     <p className="text-sm font-sans text-light-2 mb-3">{tournament.date} @ {tournament.time}</p>
-                    <div className="flex items-center gap-4">
-                        <a href="#" onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 text-light-2 hover:text-white transition-colors text-sm">
-                            <YoutubeIcon className="w-5 h-5 text-red-600" />
-                            <span>Youtube</span>
-                        </a>
-                        <a href="#" onClick={(e) => e.stopPropagation()} className="flex items-center gap-2 text-light-2 hover:text-white transition-colors text-sm">
-                            <TwitchIcon className="w-5 h-5 text-purple-500" />
-                            <span>Twitch</span>
-                        </a>
-                    </div>
                 </div>
 
                 {!isFinished && 

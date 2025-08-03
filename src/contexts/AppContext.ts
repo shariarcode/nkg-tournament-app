@@ -2,7 +2,7 @@ import React, { createContext } from 'react';
 import { Player, Tournament, Registration, LeaderboardEntry, SiteContent } from '../types';
 import { Session } from '@supabase/supabase-js';
 
-export type View = 'home' | 'tournaments' | 'profile' | 'leaderboard' | 'tournamentDetails';
+export type View = 'home' | 'tournaments' | 'profile' | 'leaderboard' | 'tournamentDetails' | 'live';
 
 export interface AppContextType {
   player: Player;
