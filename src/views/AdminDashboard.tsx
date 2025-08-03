@@ -113,12 +113,15 @@ const AdminDashboard: React.FC = () => {
                     const profileMap = new Map(profileData.map(p => [p.id, p]));
                     const tournamentMap = new Map(tournaments.map(t => [t.id, t]));
 
-                    const formattedRegs: Registration[] = regData.map(r => ({
-                        ...r,
-                        playerName: profileMap.get(r.player_id)?.name || 'N/A',
-                        playerFreeFireId: profileMap.get(r.player_id)?.free_fire_id || 'N/A',
-                        tournamentName: tournamentMap.get(r.tournament_id)?.name || 'N/A'
-                    }));
+                    const formattedRegs: Registration[] = regData.map(r => {
+                        const profile = profileMap.get(r.player_id) as any;
+                        return {
+                            ...r,
+                            playerName: profile?.name || 'N/A',
+                            playerFreeFireId: profile?.free_fire_id || 'N/A',
+                            tournamentName: tournamentMap.get(r.tournament_id)?.name || 'N/A'
+                        };
+                    });
                     setAllRegistrations(formattedRegs);
                 }
             } catch (error: any) {
