@@ -8,7 +8,7 @@ interface TournamentCardProps {
 
 const PlayerLogo: React.FC = () => (
     <div className="w-20 h-20 bg-dark-3 rounded-md flex items-center justify-center ring-1 ring-white/10">
-        <img src="/favicon.svg" alt="Player Logo" className="w-12 h-12 opacity-50" />
+        <img src="/favicon.ico" alt="Player Logo" className="w-12 h-12 opacity-50" />
     </div>
 );
 
