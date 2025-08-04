@@ -19,11 +19,15 @@ const AngledTab: React.FC<{ label: string; isActive: boolean; onClick: () => voi
 }
 
 const Tournaments: React.FC = () => {
-  const { tournaments, navigateToTournamentDetails, siteContent } = useContext(AppContext) as AppContextType;
+  const { tournaments, navigateToTournamentDetails, navigate, siteContent } = useContext(AppContext) as AppContextType;
   const [filter, setFilter] = useState<FilterStatus>('All');
 
   const handleCardClick = (tournament: Tournament) => {
-    navigateToTournamentDetails(tournament);
+    if (tournament.type && tournament.type.toLowerCase() === 'squad') {
+      navigate('squadRegistration');
+    } else {
+      navigateToTournamentDetails(tournament);
+    }
   };
   
   const filteredTournaments = tournaments.filter(t => {

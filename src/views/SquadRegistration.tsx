@@ -222,8 +222,8 @@ const SquadRegistration: React.FC = () => {
         }
     }
 
-    const selectedTournamentForFee = allTournaments.find(t => t.id === parseInt(selectedTournamentId));
-    const entryFee = selectedTournamentForFee?.entry_fee ?? 0;
+    const selectedTournamentForPayment = allTournaments.find(t => t.id === parseInt(selectedTournamentId));
+    const paymentAmount = selectedTournamentForPayment?.prize_pool ?? 0;
     
     return (
         <div className="max-w-4xl mx-auto space-y-12 animate-fade-in-up">
@@ -332,7 +332,7 @@ const SquadRegistration: React.FC = () => {
                         
                         <div className="space-y-4 pt-4 border-t border-white/10">
                             <h3 className="text-lg font-display text-white">Payment Details</h3>
-                            <p className="text-sm text-yellow-200 bg-yellow-900/50 p-3 rounded-lg font-sans">Pay the entry fee <strong className="text-white">৳{entryFee} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
+                            <p className="text-sm text-yellow-200 bg-yellow-900/50 p-3 rounded-lg font-sans">Pay the entry fee <strong className="text-white">৳{paymentAmount} BDT</strong> to our bKash number: <strong className="text-white">01301440744</strong> (Send Money), then fill the form below.</p>
                              <input type="tel" placeholder="Your bKash Number" value={bkashNumber} onChange={(e) => setBkashNumber(e.target.value)} required className="input-field" />
                              <input type="tel" placeholder="Last 4 Digits of Transaction ID" value={bkashLast4} onChange={(e) => setBkashLast4(e.target.value)} maxLength={4} required className="input-field" />
                              <div 
