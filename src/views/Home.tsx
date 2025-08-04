@@ -9,7 +9,11 @@ const Home: React.FC = () => {
 
   // Helper to safely render HTML content from the admin, with a fallback
   const createMarkup = (key: string, fallback: string) => {
-    return { __html: siteContent[key] || fallback };
+    // Create a DOMParser to safely parse HTML
+    const parser = new DOMParser();
+    const content = siteContent[key] || fallback;
+    const doc = parser.parseFromString(content, 'text/html');
+    return { __html: doc.body.innerHTML };
   };
 
   return (
