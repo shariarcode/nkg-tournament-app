@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export const HomeIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -124,6 +125,12 @@ export const YoutubeIcon: React.FC<{ className?: string }> = ({ className }) => 
 
 export const TwitchIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M2.149 0l-1.612 4.119v16.836h5.731v3.045h3.223l3.045-3.045h4.657l6.269-6.269v-14.686h-21.313zm18.687 13.612l-3.582 3.582h-5.731l-3.045 3.045v-3.045h-4.836v-15.015h17.194v11.433zm-3.582-7.343v6.269h-2.149v-6.269h2.149zm-4.836 0v6.269h-2.149v-6.269h2.149z"/></svg>
+);
+
+export const MenuIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+  </svg>
 );
 
 export const NKGLogoIcon: React.FC<{ className?: string }> = ({ className }) => (

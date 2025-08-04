@@ -1,5 +1,4 @@
 
-
 import React, { useState, useContext } from 'react';
 import { Tournament } from '../types';
 import { AppContext, AppContextType } from '../contexts/AppContext';
@@ -11,7 +10,7 @@ const AngledTab: React.FC<{ label: string; isActive: boolean; onClick: () => voi
     return (
         <button
             onClick={onClick}
-            className={`px-8 py-3 font-display uppercase text-sm tracking-wider transition-colors duration-300 ${isActive ? 'bg-brand-green text-dark-1' : 'bg-dark-3 text-light-2 hover:bg-white/10'}`}
+            className={`px-6 md:px-8 py-3 font-display uppercase text-xs md:text-sm tracking-wider transition-colors duration-300 ${isActive ? 'bg-brand-green text-dark-1' : 'bg-dark-3 text-light-2 hover:bg-white/10'}`}
             style={{ clipPath: 'polygon(10% 0, 100% 0, 90% 100%, 0% 100%)' }}
         >
             {label}
@@ -42,7 +41,7 @@ const Tournaments: React.FC = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-white">{siteContent['tournaments_page_title'] || 'Our Gaming Tournaments!'}</h1>
         </div>
         
-        <div className="flex justify-center items-center bg-dark-2 p-1 rounded-lg max-w-max mx-auto">
+        <div className="flex flex-wrap justify-center items-center bg-dark-2 p-1 rounded-lg max-w-full sm:max-w-max mx-auto">
             <AngledTab label="All Match" isActive={filter === 'All'} onClick={() => setFilter('All')} />
             <AngledTab label="Upcoming" isActive={filter === 'Upcoming'} onClick={() => setFilter('Upcoming')} />
             <AngledTab label="Finished" isActive={filter === 'Finished'} onClick={() => setFilter('Finished')} />

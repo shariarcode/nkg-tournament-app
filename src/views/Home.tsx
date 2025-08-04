@@ -1,3 +1,4 @@
+
 import React, { useContext } from 'react';
 import { AppContext, AppContextType } from '../contexts/AppContext';
 import { ArrowRightIcon, PlusIcon } from '../components/Icons';
@@ -33,7 +34,7 @@ const Home: React.FC = () => {
       {/* Features Banner */}
       <div className="bg-dark-2 py-6 border-y-2 border-brand-green">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-around items-center gap-4 text-white font-display text-lg tracking-wider">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:flex-wrap sm:justify-around text-white font-display text-lg tracking-wider">
             <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>{siteContent['home_features_banner_item1'] || 'GAMING SPANING'}</span></div>
             <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>{siteContent['home_features_banner_item2'] || 'ACTION - PACKED'}</span></div>
             <div className="flex items-center gap-3"><PlusIcon className="w-4 h-4 text-brand-green"/><span>{siteContent['home_features_banner_item3'] || 'MIND - BENDING'}</span></div>
